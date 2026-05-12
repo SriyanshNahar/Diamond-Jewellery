@@ -6,9 +6,9 @@ import styles from '../category/[slug]/page.module.css';
 const placeholderProducts = [
   { id: 1, name: 'Eternity Diamond Band', price: '₹ 45,000', image: '/rings.png', category: 'rings' },
   { id: 2, name: 'Royal Solitaire', price: '₹ 1,25,000', image: '/rings.png', category: 'rings' },
-  { id: 3, name: 'Diamond Tennis Bracelet', price: '₹ 2,85,000', image: '/rings.png', category: 'bangles' },
-  { id: 4, name: 'Vintage Rose Cut Necklace', price: '₹ 3,65,000', image: '/rings.png', category: 'necklaces' },
-  { id: 5, name: 'Luxury Diamond Watch', price: '₹ 5,35,000', image: '/rings.png', category: 'watches' },
+  { id: 3, name: 'Diamond Tennis Bracelet', price: '₹ 2,85,000', image: '/bangles.png', category: 'bangles' },
+  { id: 4, name: 'Vintage Rose Cut Necklace', price: '₹ 3,65,000', image: '/necklaces.png', category: 'necklaces' },
+  { id: 5, name: 'Luxury Diamond Watch', price: '₹ 5,35,000', image: '/watches.png', category: 'watches' },
   { id: 6, name: 'Diamond Drop Earrings', price: '₹ 1,50,000', image: '/earrings.png', category: 'earrings' },
 ];
 

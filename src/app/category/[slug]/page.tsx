@@ -15,14 +15,21 @@ const getCategoryTitle = (slug: string) => {
   return map[slug] || 'Diamond Jewellery';
 };
 
-const placeholderProducts = [
-  { id: 1, name: 'Eternity Diamond Band', price: '₹ 45,000', image: '/rings.png' },
-  { id: 2, name: 'Royal Solitaire', price: '₹ 1,25,000', image: '/rings.png' },
-  { id: 3, name: 'Classic Halo Design', price: '₹ 85,000', image: '/rings.png' },
-  { id: 4, name: 'Vintage Rose Cut', price: '₹ 65,000', image: '/rings.png' },
-  { id: 5, name: 'Minimalist Promise', price: '₹ 35,000', image: '/rings.png' },
-  { id: 6, name: 'Luxury Diamond Stack', price: '₹ 1,50,000', image: '/rings.png' },
-];
+const getProductsForCategory = (slug: string) => {
+  // If the slug matches a known image, use it. Otherwise default to rings.
+  const knownSlugs = ['rings', 'bangles', 'watches', 'necklaces', 'earrings'];
+  const imageToUse = knownSlugs.includes(slug) ? `/${slug}.png` : '/rings.png';
+  const titleToUse = getCategoryTitle(slug).replace('Diamond ', '');
+
+  return [
+    { id: 1, name: `Eternity ${titleToUse}`, price: '₹ 45,000', image: imageToUse },
+    { id: 2, name: `Royal ${titleToUse}`, price: '₹ 1,25,000', image: imageToUse },
+    { id: 3, name: `Classic ${titleToUse}`, price: '₹ 85,000', image: imageToUse },
+    { id: 4, name: `Vintage ${titleToUse}`, price: '₹ 65,000', image: imageToUse },
+    { id: 5, name: `Minimalist ${titleToUse}`, price: '₹ 35,000', image: imageToUse },
+    { id: 6, name: `Luxury ${titleToUse}`, price: '₹ 1,50,000', image: imageToUse },
+  ];
+};
 
 export default async function CategoryDetail({
   params,
@@ -31,6 +38,7 @@ export default async function CategoryDetail({
 }) {
   const resolvedParams = await params;
   const title = getCategoryTitle(resolvedParams.slug);
+  const products = getProductsForCategory(resolvedParams.slug);
 
   return (
     <div className={styles.container}>
@@ -44,12 +52,12 @@ export default async function CategoryDetail({
         {/* Filters and Sorting bar */}
         <div className={styles.toolbar}>
           <div className={styles.filterBtn}>Filter / Sort</div>
-          <div className={styles.resultsCount}>{placeholderProducts.length} Results</div>
+          <div className={styles.resultsCount}>{products.length} Results</div>
         </div>
 
         {/* Product Grid */}
         <div className={styles.grid}>
-          {placeholderProducts.map((product) => (
+          {products.map((product) => (
             <Link href={`/product/${product.id}`} key={product.id} className={styles.productCard}>
               <div className={styles.imageBox}>
                 <Image 
