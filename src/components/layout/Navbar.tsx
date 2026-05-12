@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Search, ShoppingBag, Heart, User, ChevronDown } from 'lucide-react';
 import styles from './Navbar.module.css';
 
@@ -11,6 +11,9 @@ const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+  const pathname = usePathname();
+  
+  const isHomePage = pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,8 +32,10 @@ const Navbar = () => {
     }
   };
 
+  const navClass = `${styles.header} ${scrolled ? styles.scrolled : ''} ${!isHomePage ? styles.internalPage : ''}`;
+
   return (
-    <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
+    <header className={navClass}>
       <div className={styles.topBar}>
         <p>Free Shipping Across India | Certified Natural Diamonds</p>
       </div>
