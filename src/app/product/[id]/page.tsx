@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Star, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { Star, ShieldCheck, Truck, RotateCcw, PlayCircle } from 'lucide-react';
+import { use } from 'react';
 import styles from './page.module.css';
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = use(paramsPromise);
   // Hardcoded for mockup, ideally fetched from DB using params.id
   const product = {
     id: params.id,
@@ -15,42 +17,67 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     metal: "18K Yellow Gold",
     diamondWeight: "0.50 Carats",
     clarity: "VS-GH",
-    images: ["/rings.png", "/earrings.png"]
+    media: [
+      { type: 'image', url: "/rings.png" },
+      { type: 'image', url: "/earrings.png" },
+      { type: 'image', url: "/necklaces.png" },
+      { type: 'image', url: "/watches.png" },
+      { type: 'image', url: "/rings.png" },
+      { type: 'image', url: "/earrings.png" },
+      { type: 'video', url: "https://www.w3schools.com/html/mov_bbb.mp4" } // Example video
+    ]
   };
 
-  const [mainImage, setMainImage] = useState(product.images[0]);
+  const [activeMedia, setActiveMedia] = useState(product.media[0]);
   const [zoom, setZoom] = useState(false);
 
   return (
     <div className={styles.container}>
       <div className="container">
-
+        
         <div className={styles.productGrid}>
-          {/* Images Section */}
+          {/* Images & Video Section */}
           <div className={styles.imageGallery}>
             <div className={styles.thumbnails}>
-              {product.images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={`${styles.thumbnail} ${mainImage === img ? styles.activeThumb : ''}`}
-                  onClick={() => setMainImage(img)}
+              {product.media.map((item, idx) => (
+                <div 
+                  key={idx} 
+                  className={`${styles.thumbnail} ${activeMedia.url === item.url ? styles.activeThumb : ''}`}
+                  onClick={() => { setActiveMedia(item); setZoom(false); }}
                 >
-                  <Image src={img} alt="Thumbnail" fill style={{ objectFit: 'cover' }} />
+                  {item.type === 'image' ? (
+                    <Image src={item.url} alt="Thumbnail" fill style={{ objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ position: 'relative', width: '100%', height: '100%', background: '#f5f5dc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                       <PlayCircle size={24} color="var(--color-gold-dark)" />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-
-            <div
-              className={`${styles.mainImageContainer} ${zoom ? styles.zoomed : ''}`}
-              onClick={() => setZoom(!zoom)}
-              style={{ cursor: zoom ? 'zoom-out' : 'zoom-in' }}
+            
+            <div 
+              className={`${styles.mainImageContainer} ${zoom && activeMedia.type === 'image' ? styles.zoomed : ''}`}
+              onClick={() => { if(activeMedia.type === 'image') setZoom(!zoom) }}
+              style={{ cursor: activeMedia.type === 'image' ? (zoom ? 'zoom-out' : 'zoom-in') : 'default' }}
             >
-              <Image
-                src={mainImage}
-                alt={product.name}
-                fill
-                className={styles.mainImage}
-              />
+              {activeMedia.type === 'image' ? (
+                <Image 
+                  src={activeMedia.url} 
+                  alt={product.name} 
+                  fill 
+                  className={styles.mainImage} 
+                />
+              ) : (
+                <video 
+                  src={activeMedia.url} 
+                  controls 
+                  autoPlay 
+                  loop 
+                  muted 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} 
+                />
+              )}
             </div>
           </div>
 
