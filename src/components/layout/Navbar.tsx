@@ -24,8 +24,9 @@ const Navbar = () => {
       <nav className={styles.nav}>
         <div className={styles.left}>
           <Link href="/category" className={styles.link}>Collections</Link>
-          <Link href="/custom-design" className={styles.link}>Custom Design</Link>
+          <Link href="/custom-design" className={styles.link}>Custom</Link>
           <Link href="/about" className={styles.link}>About</Link>
+          <Link href="/contact" className={styles.link}>Contact</Link>
         </div>
         
         <div className={styles.center}>

@@ -1,0 +1,110 @@
+.container {
+  padding-top: 5rem;
+  background-color: var(--color-white);
+  min-height: 100vh;
+}
+
+.heroSection {
+  height: 50vh;
+  background-color: var(--color-beige);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 2rem;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.title {
+  font-size: 4rem;
+  color: var(--color-black);
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: var(--color-gray);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.storySection {
+  padding: 8rem 0;
+}
+
+.storyGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: center;
+}
+
+.heading {
+  font-size: 2.5rem;
+  color: var(--color-black);
+  margin-bottom: 2rem;
+}
+
+.text {
+  font-size: 1.1rem;
+  color: var(--color-gray);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.imageBox {
+  position: relative;
+  aspect-ratio: 4/5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.valuesSection {
+  padding: 8rem 0;
+  background-color: var(--background);
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+}
+
+.valueCard {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 4px;
+  transition: transform 0.3s ease;
+}
+
+.valueCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.valueCard h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--color-gold-dark);
+}
+
+.valueCard p {
+  color: var(--color-gray);
+  line-height: 1.6;
+}
+
+@media (max-width: 968px) {
+  .storyGrid {
+    grid-template-columns: 1fr;
+    gap: 4rem;
+  }
+  .valuesGrid {
+    grid-template-columns: 1fr;
+  }
+}
