@@ -1,5 +1,6 @@
 import React from 'react';
 import Sidebar from '@/components/admin/Sidebar';
+import AdminGuard from '@/components/admin/AdminGuard';
 import styles from './layout.module.css';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -7,7 +8,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className={styles.adminContainer}>
       <Sidebar />
       <main className={styles.mainContent}>
-        {children}
+        <AdminGuard>
+          {children}
+        </AdminGuard>
       </main>
     </div>
   );
