@@ -24,14 +24,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   return (
     <div className={styles.container}>
       <div className="container">
-        
+
         <div className={styles.productGrid}>
           {/* Images Section */}
           <div className={styles.imageGallery}>
             <div className={styles.thumbnails}>
               {product.images.map((img, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className={`${styles.thumbnail} ${mainImage === img ? styles.activeThumb : ''}`}
                   onClick={() => setMainImage(img)}
                 >
@@ -39,17 +39,17 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 </div>
               ))}
             </div>
-            
-            <div 
+
+            <div
               className={`${styles.mainImageContainer} ${zoom ? styles.zoomed : ''}`}
               onClick={() => setZoom(!zoom)}
               style={{ cursor: zoom ? 'zoom-out' : 'zoom-in' }}
             >
-              <Image 
-                src={mainImage} 
-                alt={product.name} 
-                fill 
-                className={styles.mainImage} 
+              <Image
+                src={mainImage}
+                alt={product.name}
+                fill
+                className={styles.mainImage}
               />
             </div>
           </div>
@@ -57,7 +57,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           {/* Product Info Section */}
           <div className={styles.productInfo}>
             <h1 className={styles.productTitle}>{product.name}</h1>
-            
+
             <div className={styles.reviewsRow}>
               <div className={styles.stars}>
                 <Star size={16} fill="#D4AF37" color="#D4AF37" />
@@ -128,7 +128,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 85,000</p>
               </div>
             </div>
-            
+
             {/* Recommendation 2 */}
             <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
               <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
@@ -150,7 +150,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 1,15,000</p>
               </div>
             </div>
-            
+
             {/* Recommendation 4 */}
             <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
               <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
@@ -169,11 +169,11 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           <h2 className={styles.sectionTitle}>Customer Reviews</h2>
           <div className={styles.reviewCard}>
             <div className={styles.stars}>
-                <Star size={14} fill="#D4AF37" color="#D4AF37" />
-                <Star size={14} fill="#D4AF37" color="#D4AF37" />
-                <Star size={14} fill="#D4AF37" color="#D4AF37" />
-                <Star size={14} fill="#D4AF37" color="#D4AF37" />
-                <Star size={14} fill="#D4AF37" color="#D4AF37" />
+              <Star size={14} fill="#D4AF37" color="#D4AF37" />
+              <Star size={14} fill="#D4AF37" color="#D4AF37" />
+              <Star size={14} fill="#D4AF37" color="#D4AF37" />
+              <Star size={14} fill="#D4AF37" color="#D4AF37" />
+              <Star size={14} fill="#D4AF37" color="#D4AF37" />
             </div>
             <h4>Absolutely Stunning</h4>
             <p className={styles.reviewText}>"The craftsmanship is unparalleled. It looks even better in person. I will definitely be purchasing from Aura again."</p>
