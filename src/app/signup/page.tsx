@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Diamond } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 
 const FloatingDiamond = ({ delay, duration, size, left, top }: any) => (
   <motion.div
@@ -35,18 +34,6 @@ const FloatingDiamond = ({ delay, duration, size, left, top }: any) => (
 
 export default function SignupPage() {
   const [isLogin, setIsLogin] = useState(true);
-
-  const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/signup`, 
-      },
-    });
-    if (error) {
-      alert('Google Login failed: ' + error.message + '\n\nNote: You need to configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
-    }
-  };
 
   // Background diamond config
   const diamonds = [
@@ -153,7 +140,7 @@ export default function SignupPage() {
           </div>
           
           <motion.button 
-            onClick={handleGoogleLogin}
+            whileHover={{ scale: 1.02, backgroundColor: '#f8f9fa', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}
             whileTap={{ scale: 0.98 }}
             style={{ 
               width: '100%', 
