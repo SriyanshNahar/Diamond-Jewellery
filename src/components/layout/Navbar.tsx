@@ -79,8 +79,8 @@ const Navbar = () => {
           ) : (
             <button className={styles.iconBtn} onClick={() => setSearchOpen(true)} aria-label="Search"><Search size={20} /></button>
           )}
-          <button className={styles.iconBtn} aria-label="Wishlist"><Heart size={20} /></button>
-          <button className={styles.iconBtn} aria-label="Cart"><ShoppingBag size={20} /></button>
+          <Link href="/wishlist" className={styles.iconBtn} aria-label="Wishlist"><Heart size={20} /></Link>
+          <Link href="/cart" className={styles.iconBtn} aria-label="Cart"><ShoppingBag size={20} /></Link>
           <Link href="/signup" className={styles.iconBtn} aria-label="Profile"><User size={20} /></Link>
         </div>
       </nav>

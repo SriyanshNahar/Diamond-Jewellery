@@ -114,6 +114,56 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </div>
         </div>
 
+        {/* Product Recommendations */}
+        <div style={{ marginTop: '5rem', borderTop: '1px solid var(--color-gray-light)', paddingTop: '4rem' }}>
+          <h2 className={styles.sectionTitle} style={{ textAlign: 'center', marginBottom: '3rem' }}>You May Also Like</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
+            {/* Recommendation 1 */}
+            <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
+                <Image src="/rings.png" alt="Princess Cut Ring" fill style={{ objectFit: 'cover' }} />
+              </div>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Princess Cut Halo Ring</h3>
+                <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 85,000</p>
+              </div>
+            </div>
+            
+            {/* Recommendation 2 */}
+            <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
+                <Image src="/watches.png" alt="Diamond Watch" fill style={{ objectFit: 'cover' }} />
+              </div>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Oyster Perpetual Diamond</h3>
+                <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 5,20,000</p>
+              </div>
+            </div>
+
+            {/* Recommendation 3 */}
+            <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
+                <Image src="/earrings.png" alt="Diamond Earrings" fill style={{ objectFit: 'cover' }} />
+              </div>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Vintage Drop Earrings</h3>
+                <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 1,15,000</p>
+              </div>
+            </div>
+            
+            {/* Recommendation 4 */}
+            <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
+                <Image src="/necklaces.png" alt="Diamond Necklace" fill style={{ objectFit: 'cover' }} />
+              </div>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Solitaire Pendant</h3>
+                <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 65,000</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Reviews Section Placeholder */}
         <div className={styles.reviewsSection}>
           <h2 className={styles.sectionTitle}>Customer Reviews</h2>
