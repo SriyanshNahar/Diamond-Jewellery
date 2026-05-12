@@ -8,6 +8,7 @@ import styles from './page.module.css';
 export default function CustomDesignPage() {
   const [images, setImages] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -22,10 +23,12 @@ export default function CustomDesignPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate form submission
+    setIsSubmitting(true);
+    // Simulate form submission loading time
     setTimeout(() => {
+      setIsSubmitting(false);
       setSubmitted(true);
-    }, 1000);
+    }, 2000);
   };
 
   if (submitted) {
@@ -179,8 +182,8 @@ export default function CustomDesignPage() {
                 </div>
               </div>
 
-              <button type="submit" className={`btn-primary ${styles.submitBtn}`}>
-                Request Consultation
+              <button type="submit" className={`btn-primary ${styles.submitBtn}`} disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Request Consultation'}
               </button>
             </div>
 

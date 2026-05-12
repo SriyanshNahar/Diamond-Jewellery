@@ -65,7 +65,14 @@ export default function Sidebar() {
           <Settings size={20} />
           <span>Settings</span>
         </Link>
-        <button className={styles.navItem} style={{ width: '100%', border: 'none', background: 'transparent', textAlign: 'left' }}>
+        <button 
+          className={styles.navItem} 
+          style={{ width: '100%', border: 'none', background: 'transparent', textAlign: 'left' }}
+          onClick={() => {
+            localStorage.removeItem('isAdmin');
+            window.location.href = '/';
+          }}
+        >
           <LogOut size={20} />
           <span>Logout</span>
         </button>

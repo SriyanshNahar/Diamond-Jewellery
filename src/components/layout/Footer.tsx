@@ -9,7 +9,7 @@ const Footer = () => {
       <div className={styles.topSection}>
         <div className="container">
           <div className={styles.grid}>
-            
+
             {/* Brand Info */}
             <div className={styles.brandCol}>
               <h2 className={styles.logo}>AURA</h2>
@@ -68,7 +68,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      
+
       <div className={styles.bottomSection}>
         <div className="container">
           <div className={styles.bottomFlex}>
