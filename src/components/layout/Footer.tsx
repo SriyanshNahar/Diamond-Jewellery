@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import styles from './Footer.module.css';
 
 const Footer = () => {
@@ -17,10 +17,10 @@ const Footer = () => {
                 Aura Fine Jewellery crafts timeless masterpieces with ethically sourced, certified natural diamonds. Elevating everyday elegance since 1998.
               </p>
               <div className={styles.socials}>
-                <a href="#" aria-label="Facebook"><Facebook size={20} /></a>
-                <a href="#" aria-label="Instagram"><Instagram size={20} /></a>
-                <a href="#" aria-label="Twitter"><Twitter size={20} /></a>
-                <a href="#" aria-label="Youtube"><Youtube size={20} /></a>
+                <a href="#" aria-label="Facebook">FB</a>
+                <a href="#" aria-label="Instagram">IG</a>
+                <a href="#" aria-label="Twitter">X</a>
+                <a href="#" aria-label="Youtube">YT</a>
               </div>
             </div>
 
