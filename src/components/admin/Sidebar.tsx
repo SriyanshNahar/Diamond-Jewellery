@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, ShoppingBag, Users, MessageSquare, Diamond, Tag, LogOut, Settings } from 'lucide-react';
-import styles from './admin.module.css';
+import styles from '@/app/admin/admin.module.css';
 
 const Sidebar = () => {
   const pathname = usePathname();
