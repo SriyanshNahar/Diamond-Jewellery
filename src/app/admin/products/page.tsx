@@ -113,7 +113,7 @@ export default function ProductsPage() {
             </tr>
           </thead>
           <tbody>
-            {mockProducts.map(prod => (
+            {initialMockProducts.map(prod => (
               <tr key={prod.id}>
                 <td style={{ padding: '1rem', borderBottom: '1px solid var(--color-gray-light)' }}>{prod.name}</td>
                 <td style={{ padding: '1rem', borderBottom: '1px solid var(--color-gray-light)' }}>{prod.category}</td>
