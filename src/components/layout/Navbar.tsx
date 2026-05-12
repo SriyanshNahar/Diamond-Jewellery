@@ -14,7 +14,6 @@ const Navbar = () => {
   const pathname = usePathname();
   
   const isHomePage = pathname === '/';
-  const isAdminPage = pathname.startsWith('/admin');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,8 +31,6 @@ const Navbar = () => {
       setSearchQuery('');
     }
   };
-
-  if (isAdminPage) return null;
 
   const navClass = `${styles.header} ${scrolled ? styles.scrolled : ''} ${!isHomePage ? styles.internalPage : ''}`;
 

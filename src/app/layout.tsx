@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,9 +29,9 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable}`}
     >
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Navbar />
-        {children}
-        <Footer />
+        <LayoutWrapper>
+          {children}
+        </LayoutWrapper>
       </body>
     </html>
   );
