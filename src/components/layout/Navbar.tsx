@@ -36,9 +36,6 @@ const Navbar = () => {
 
   return (
     <header className={navClass}>
-      <div className={styles.topBar}>
-        <p>Free Shipping Across India | Certified Natural Diamonds</p>
-      </div>
       <nav className={styles.nav}>
         <div className={styles.left}>
           <div className={styles.dropdownContainer}>
