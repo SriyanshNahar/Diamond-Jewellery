@@ -58,12 +58,6 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <div style={{ marginTop: '2rem', textAlign: 'center', paddingTop: '2rem', borderTop: '1px solid var(--color-gray-light)' }}>
-          <p style={{ color: 'var(--color-gray)', fontSize: '0.9rem', marginBottom: '1rem' }}>Are you an administrator?</p>
-          <Link href="/login" style={{ color: 'var(--color-black)', fontWeight: 'bold', textDecoration: 'none', borderBottom: '1px solid var(--color-black)', paddingBottom: '0.2rem' }}>
-            Go to Admin Portal
-          </Link>
-        </div>
       </div>
     </div>
   );

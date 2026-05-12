@@ -81,7 +81,7 @@ const Navbar = () => {
           )}
           <button className={styles.iconBtn} aria-label="Wishlist"><Heart size={20} /></button>
           <button className={styles.iconBtn} aria-label="Cart"><ShoppingBag size={20} /></button>
-          <Link href="/login" className={styles.iconBtn} aria-label="Profile"><User size={20} /></Link>
+          <Link href="/signup" className={styles.iconBtn} aria-label="Profile"><User size={20} /></Link>
         </div>
       </nav>
     </header>
