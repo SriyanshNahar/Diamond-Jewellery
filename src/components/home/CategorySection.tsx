@@ -15,9 +15,33 @@ const categories = [
   },
   {
     id: 2,
-    title: 'Elegant Earrings',
+    title: 'Diamond Necklaces',
+    image: '/necklaces.png',
+    link: '/category/necklaces'
+  },
+  {
+    id: 3,
+    title: 'Diamond Watches',
+    image: '/watches.png',
+    link: '/category/watches'
+  },
+  {
+    id: 4,
+    title: 'Diamond Bangles',
+    image: '/bangles.png',
+    link: '/category/bangles'
+  },
+  {
+    id: 5,
+    title: 'Diamond Earrings',
     image: '/earrings.png',
     link: '/category/earrings'
+  },
+  {
+    id: 6,
+    title: 'Other Jewellery',
+    image: '/rings.png', // Fallback image for 'other'
+    link: '/category/other'
   }
 ];
 
