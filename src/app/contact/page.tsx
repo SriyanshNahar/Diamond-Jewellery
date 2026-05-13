@@ -3,13 +3,40 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import styles from './page.module.css';
+import { supabase } from '@/lib/supabase';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const prohibitedWords = ['abuse', 'badword', 'spam', 'hate', 'stupid', 'idiot'];
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTimeout(() => setSubmitted(true), 1000);
+    setError('');
+
+    if (formData.name.length < 2) return setError('Name must be at least 2 characters');
+    const hasBadWord = prohibitedWords.some(word => formData.message.toLowerCase().includes(word));
+    if (hasBadWord) return setError('Please maintain respectful language in your message.');
+
+    setLoading(true);
+    
+    const { error: dbError } = await (supabase.from('contacts') as any).insert([{
+      name: formData.name,
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message
+    }]);
+
+    if (!dbError) {
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } else {
+      alert('Error sending message: ' + dbError.message);
+    }
+    setLoading(false);
   };
 
   return (
@@ -67,20 +94,21 @@ export default function ContactPage() {
             ) : (
               <form onSubmit={handleSubmit} className={styles.form}>
                 <h3 className={styles.formTitle}>Send a Message</h3>
+                {error && <p style={{ color: "#ef4444", background: "#fee2e2", padding: "0.5rem", borderRadius: "4px", marginBottom: "1rem" }}>{error}</p>}
                 
                 <div className={styles.inputGroup}>
                   <label>Full Name</label>
-                  <input type="text" required className={styles.input} />
+                  <input type="text" required className={styles.input} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                 </div>
                 
                 <div className={styles.inputGroup}>
                   <label>Email Address</label>
-                  <input type="email" required className={styles.input} />
+                  <input type="email" required className={styles.input} value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
                 </div>
                 
                 <div className={styles.inputGroup}>
                   <label>Subject</label>
-                  <select className={styles.input} required>
+                  <select className={styles.input} required value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})}>
                     <option value="">Select a topic</option>
                     <option value="general">General Inquiry</option>
                     <option value="order">Order Status</option>
@@ -91,10 +119,12 @@ export default function ContactPage() {
                 
                 <div className={styles.inputGroup}>
                   <label>Message</label>
-                  <textarea rows={5} required className={styles.input}></textarea>
+                  <textarea rows={5} required className={styles.input} value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea>
                 </div>
                 
-                <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem' }}>Submit Inquiry</button>
+                <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
+                  {loading ? 'Submitting...' : 'Submit Inquiry'}
+                </button>
               </form>
             )}
           </div>

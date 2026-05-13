@@ -1,35 +1,52 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Star, ShieldCheck, Truck, RotateCcw, PlayCircle } from 'lucide-react';
+import { Star, ShieldCheck, Truck, RotateCcw, PlayCircle, Heart, ShoppingBag } from 'lucide-react';
 import { use } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useCart } from '@/context/CartContext';
 import styles from './page.module.css';
 
 export default function ProductDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const params = use(paramsPromise);
-  // Hardcoded for mockup, ideally fetched from DB using params.id
-  const product = {
-    id: params.id,
-    name: "Eternity Diamond Band",
-    price: "₹ 45,000",
-    description: "An exquisite eternity band featuring perfectly matched, ethically sourced natural diamonds set in 18K solid gold. Designed to be worn alone or stacked for an elevated look.",
-    metal: "18K Yellow Gold",
-    diamondWeight: "0.50 Carats",
-    clarity: "VS-GH",
-    media: [
-      { type: 'image', url: "/rings.png" },
-      { type: 'image', url: "/earrings.png" },
-      { type: 'image', url: "/necklaces.png" },
-      { type: 'image', url: "/watches.png" },
-      { type: 'image', url: "/rings.png" },
-      { type: 'image', url: "/earrings.png" },
-      { type: 'video', url: "https://www.w3schools.com/html/mov_bbb.mp4" } // Example video
-    ]
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeMedia, setActiveMedia] = useState<any>(null);
+  const [zoom, setZoom] = useState(false);
+  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', params.id)
+        .single();
+      
+      if (data) {
+        // Build media array from images array or legacy img field
+        const imagesArray = (data as any).images && (data as any).images.length > 0 ? (data as any).images : [(data as any).img];
+        const media = imagesArray.map((url: string) => ({ type: 'image', url }));
+        
+        setProduct({ ...(data as any), media });
+        setActiveMedia(media[0]);
+      }
+      setLoading(false);
+    };
+    fetchProduct();
+  }, [params.id]);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(price);
   };
 
-  const [activeMedia, setActiveMedia] = useState(product.media[0]);
-  const [zoom, setZoom] = useState(false);
+  if (loading) return <div style={{ padding: '10rem', textAlign: 'center' }}>Loading...</div>;
+  if (!product) return <div style={{ padding: '10rem', textAlign: 'center' }}>Product not found</div>;
 
   return (
     <div className={styles.container}>
@@ -39,14 +56,14 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
           {/* Images & Video Section */}
           <div className={styles.imageGallery}>
             <div className={styles.thumbnails}>
-              {product.media.map((item, idx) => (
+              {product.media.map((item: any, idx: number) => (
                 <div 
                   key={idx} 
                   className={`${styles.thumbnail} ${activeMedia.url === item.url ? styles.activeThumb : ''}`}
                   onClick={() => { setActiveMedia(item); setZoom(false); }}
                 >
                   {item.type === 'image' ? (
-                    <Image src={item.url} alt="Thumbnail" fill style={{ objectFit: 'cover' }} />
+                    <Image src={item.url} alt="Thumbnail" fill sizes="80px" style={{ objectFit: 'cover' }} />
                   ) : (
                     <div style={{ position: 'relative', width: '100%', height: '100%', background: '#f5f5dc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                        <PlayCircle size={24} color="var(--color-gold-dark)" />
@@ -66,6 +83,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                   src={activeMedia.url} 
                   alt={product.name} 
                   fill 
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className={styles.mainImage} 
                 />
               ) : (
@@ -93,34 +111,40 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                 <Star size={16} fill="#D4AF37" color="#D4AF37" />
                 <Star size={16} fill="#D4AF37" color="#D4AF37" />
               </div>
-              <span className={styles.reviewCount}>(24 Reviews)</span>
+              <h1 className={styles.productName}>{product.name}</h1>
             </div>
 
-            <p className={styles.price}>{product.price}</p>
-            <p className={styles.taxInfo}>Inclusive of all taxes</p>
-
-            <div className={styles.description}>
-              <p>{product.description}</p>
+            <div className={styles.priceRow}>
+              <span className={styles.currentPrice}>{formatPrice(product.price)}</span>
+              {product.old_price && <span className={styles.originalPrice}>{formatPrice(product.old_price)}</span>}
             </div>
+            
+            <p className={styles.description}>
+              {product.description || "An exquisite piece featuring perfectly matched, ethically sourced natural diamonds set in solid gold. Designed for an elevated look."}
+            </p>
 
-            <div className={styles.detailsBox}>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Metal</span>
-                <span className={styles.detailValue}>{product.metal}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Diamond Weight</span>
-                <span className={styles.detailValue}>{product.diamondWeight}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Clarity & Color</span>
-                <span className={styles.detailValue}>{product.clarity}</span>
-              </div>
+            <div className={styles.actions}>
+              <button 
+                onClick={() => addToCart(product)}
+                className="btn-primary" 
+                style={{ flex: 1, padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              >
+                <ShoppingBag size={20} /> ADD TO BAG
+              </button>
+              <button 
+                onClick={() => toggleWishlist(product.id)}
+                className={styles.wishlistBtn}
+                style={{ 
+                  padding: '1rem', 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px', 
+                  background: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                <Heart size={20} fill={isInWishlist(product.id) ? "#ef4444" : "none"} color={isInWishlist(product.id) ? "#ef4444" : "#666"} />
+              </button>
             </div>
-
-            <button className={`btn-primary ${styles.addToCartBtn}`}>
-              Add to Cart
-            </button>
 
             {/* Trust Badges */}
             <div className={styles.trustBadges}>
@@ -148,7 +172,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
             {/* Recommendation 1 */}
             <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
               <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                <Image src="/rings.png" alt="Princess Cut Ring" fill style={{ objectFit: 'cover' }} />
+                <Image src="/rings.png" alt="Princess Cut Ring" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '1.5rem', textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Princess Cut Halo Ring</h3>
@@ -159,7 +183,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
             {/* Recommendation 2 */}
             <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
               <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                <Image src="/watches.png" alt="Diamond Watch" fill style={{ objectFit: 'cover' }} />
+                <Image src="/watches.png" alt="Diamond Watch" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '1.5rem', textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Oyster Perpetual Diamond</h3>
@@ -170,7 +194,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
             {/* Recommendation 3 */}
             <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
               <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                <Image src="/earrings.png" alt="Diamond Earrings" fill style={{ objectFit: 'cover' }} />
+                <Image src="/earrings.png" alt="Diamond Earrings" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '1.5rem', textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Vintage Drop Earrings</h3>
@@ -181,7 +205,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
             {/* Recommendation 4 */}
             <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
               <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                <Image src="/necklaces.png" alt="Diamond Necklace" fill style={{ objectFit: 'cover' }} />
+                <Image src="/necklaces.png" alt="Diamond Necklace" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '1.5rem', textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Solitaire Pendant</h3>

@@ -112,3 +112,32 @@ button {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  h1 { font-size: 2rem !important; }
+  h2 { font-size: 1.75rem !important; }
+  h3 { font-size: 1.5rem !important; }
+}
+
+.grid-responsive {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.grid-2-col-responsive {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 2fr 1fr;
+}
+
+@media (max-width: 992px) {
+  .grid-2-col-responsive {
+    grid-template-columns: 1fr;
+  }
+}

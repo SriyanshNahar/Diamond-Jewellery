@@ -34,6 +34,52 @@ const FloatingDiamond = ({ delay, duration, size, left, top }: any) => (
 
 export default function SignupPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const validatePhone = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length > 0 && !['6','7','8','9'].includes(digits[0])) {
+      setPhoneError('Number must start with 6, 7, 8, or 9');
+    } else if (digits.length > 0 && digits.length < 10) {
+      setPhoneError('Enter a valid 10-digit mobile number');
+    } else {
+      setPhoneError('');
+    }
+    setPhone(digits.slice(0, 10));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setSuccess('');
+    if (!isLogin && phoneError) return;
+    setLoading(true);
+
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    if (isLogin) {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) setAuthError(error.message);
+      else { setSuccess('Logged in successfully! Redirecting...'); setTimeout(() => window.location.href = '/', 1500); }
+    } else {
+      const { error } = await supabase.auth.signUp({ email, password, options: { data: { first_name: firstName, last_name: lastName, phone: '+91' + phone } } });
+      if (error) setAuthError(error.message);
+      else setSuccess('Account created! Please check your email to verify.');
+    }
+    setLoading(false);
+  };
 
   // Background diamond config
   const diamonds = [
@@ -47,6 +93,10 @@ export default function SignupPage() {
     { delay: 8, duration: 19, size: 30, left: 5, top: 50 },
   ];
 
+  const inputStyle = { width: '100%', padding: '0.8rem', border: '1px solid var(--color-gray-light)', borderRadius: '4px', outline: 'none', transition: 'border-color 0.3s', fontSize: '0.95rem' };
+  const onFocus = (e: any) => e.target.style.borderColor = 'var(--color-gold-dark)';
+  const onBlur = (e: any) => e.target.style.borderColor = 'var(--color-gray-light)';
+
   return (
     <div style={{ position: 'relative', display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--background)', padding: '8rem 2rem 5rem', overflow: 'hidden' }}>
       
@@ -59,19 +109,19 @@ export default function SignupPage() {
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }}
-        style={{ position: 'relative', zIndex: 10, background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(16px)', padding: '3rem', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.5) inset', width: '100%', maxWidth: '450px', border: '1px solid rgba(212, 175, 55, 0.2)' }}
+        style={{ position: 'relative', zIndex: 10, background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(16px)', padding: '3rem', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.5) inset', width: '100%', maxWidth: '460px', border: '1px solid rgba(212, 175, 55, 0.2)' }}
       >
         
         {/* Tabs */}
         <div style={{ display: 'flex', marginBottom: '2rem', position: 'relative' }}>
           <button 
-            onClick={() => setIsLogin(true)}
+            onClick={() => { setIsLogin(true); setAuthError(''); setSuccess(''); }}
             style={{ flex: 1, padding: '1rem', background: 'none', border: 'none', color: isLogin ? 'var(--color-black)' : 'var(--color-gray)', fontWeight: isLogin ? 'bold' : 'normal', fontSize: '1.1rem', cursor: 'pointer', zIndex: 2 }}
           >
             Login
           </button>
           <button 
-            onClick={() => setIsLogin(false)}
+            onClick={() => { setIsLogin(false); setAuthError(''); setSuccess(''); }}
             style={{ flex: 1, padding: '1rem', background: 'none', border: 'none', color: !isLogin ? 'var(--color-black)' : 'var(--color-gray)', fontWeight: !isLogin ? 'bold' : 'normal', fontSize: '1.1rem', cursor: 'pointer', zIndex: 2 }}
           >
             Sign Up
@@ -84,6 +134,9 @@ export default function SignupPage() {
           />
         </div>
 
+        {authError && <p style={{ color: '#ef4444', background: '#fee2e2', padding: '0.6rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '1rem', textAlign: 'center' }}>{authError}</p>}
+        {success && <p style={{ color: '#166534', background: '#dcfce7', padding: '0.6rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '1rem', textAlign: 'center' }}>{success}</p>}
+
         <AnimatePresence mode="wait">
           <motion.form 
             key={isLogin ? 'login' : 'signup'}
@@ -91,83 +144,73 @@ export default function SignupPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
             transition={{ duration: 0.3 }}
-            style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} 
-            onSubmit={(e) => e.preventDefault()}
+            style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }} 
+            onSubmit={handleSubmit}
           >
             {!isLogin && (
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-gray)', fontSize: '0.9rem' }}>First Name</label>
-                  <input type="text" required style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--color-gray-light)', borderRadius: '4px', outline: 'none', transition: 'border-color 0.3s' }} onFocus={(e) => e.target.style.borderColor = 'var(--color-gold-dark)'} onBlur={(e) => e.target.style.borderColor = 'var(--color-gray-light)'} />
+                  <input type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-gray)', fontSize: '0.9rem' }}>Last Name</label>
-                  <input type="text" required style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--color-gray-light)', borderRadius: '4px', outline: 'none', transition: 'border-color 0.3s' }} onFocus={(e) => e.target.style.borderColor = 'var(--color-gold-dark)'} onBlur={(e) => e.target.style.borderColor = 'var(--color-gray-light)'} />
+                  <input type="text" required value={lastName} onChange={e => setLastName(e.target.value)} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                 </div>
               </div>
             )}
             
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-gray)', fontSize: '0.9rem' }}>Email Address</label>
-              <input type="email" required style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--color-gray-light)', borderRadius: '4px', outline: 'none', transition: 'border-color 0.3s' }} onFocus={(e) => e.target.style.borderColor = 'var(--color-gold-dark)'} onBlur={(e) => e.target.style.borderColor = 'var(--color-gray-light)'} />
+              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
             </div>
+
+            {!isLogin && (
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-gray)', fontSize: '0.9rem' }}>Mobile Number</label>
+                <div style={{ display: 'flex', gap: '0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', padding: '0.8rem 0.8rem', background: '#f5f5f5', border: '1px solid var(--color-gray-light)', borderRight: 'none', borderRadius: '4px 0 0 4px', fontSize: '0.9rem', color: 'var(--color-black)', fontWeight: '500', whiteSpace: 'nowrap' }}>
+                    🇮🇳 +91
+                  </div>
+                  <input 
+                    type="tel" 
+                    required
+                    placeholder="9XXXXXXXXX"
+                    value={phone}
+                    onChange={e => validatePhone(e.target.value)}
+                    maxLength={10}
+                    style={{ ...inputStyle, borderRadius: '0 4px 4px 0', flex: 1, borderColor: phoneError ? '#ef4444' : 'var(--color-gray-light)' }} 
+                    onFocus={onFocus} 
+                    onBlur={onBlur} 
+                  />
+                </div>
+                {phoneError && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.3rem' }}>{phoneError}</p>}
+              </div>
+            )}
 
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <label style={{ color: 'var(--color-gray)', fontSize: '0.9rem' }}>Password</label>
                 {isLogin && <a href="#" style={{ fontSize: '0.8rem', color: 'var(--color-gold-dark)', textDecoration: 'none' }}>Forgot Password?</a>}
               </div>
-              <input type="password" required style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--color-gray-light)', borderRadius: '4px', outline: 'none', transition: 'border-color 0.3s' }} onFocus={(e) => e.target.style.borderColor = 'var(--color-gold-dark)'} onBlur={(e) => e.target.style.borderColor = 'var(--color-gray-light)'} />
+              <input type="password" required value={password} onChange={e => setPassword(e.target.value)} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
             </div>
 
             <motion.button 
               whileHover={{ scale: 1.02, backgroundColor: '#000' }}
               whileTap={{ scale: 0.98 }}
               type="submit" 
-              className="btn-primary" 
-              style={{ width: '100%', padding: '1rem', marginTop: '0.5rem', background: 'var(--color-black)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.3s' }}
+              disabled={loading}
+              style={{ width: '100%', padding: '1rem', marginTop: '0.5rem', background: 'var(--color-black)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.3s', fontSize: '1rem', fontWeight: '600' }}
             >
-              {isLogin ? 'Sign In' : 'Create Account'}
+              {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
             </motion.button>
           </motion.form>
         </AnimatePresence>
 
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0' }}>
-            <div style={{ flex: 1, height: '1px', background: 'var(--color-gray-light)' }}></div>
-            <span style={{ padding: '0 1rem', color: 'var(--color-gray)', fontSize: '0.9rem' }}>or continue with</span>
-            <div style={{ flex: 1, height: '1px', background: 'var(--color-gray-light)' }}></div>
-          </div>
-          
-          <motion.button 
-            whileHover={{ scale: 1.02, backgroundColor: '#f8f9fa', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}
-            whileTap={{ scale: 0.98 }}
-            style={{ 
-              width: '100%', 
-              padding: '0.8rem', 
-              background: 'white', 
-              border: '1px solid var(--color-gray-light)', 
-              borderRadius: '4px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '0.8rem', 
-              cursor: 'pointer',
-              fontWeight: '500',
-              color: 'var(--color-black)',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Google
-          </motion.button>
-          <p style={{ marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--color-gray)', lineHeight: '1.4' }}>
-            By continuing, you agree to Aura's Terms of Service and Privacy Policy. We use this data for secure human verification and personalized luxury marketing.
+        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <p style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--color-gray)', lineHeight: '1.4' }}>
+            By continuing, you agree to Aura's Terms of Service and Privacy Policy.
           </p>
         </div>
 

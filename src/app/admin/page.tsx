@@ -1,33 +1,66 @@
-import React from 'react';
-import { Package, ShoppingCart, IndianRupee, Clock, MessageSquare, PenTool } from 'lucide-react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Package, ShoppingCart, IndianRupee, Clock, MessageSquare, PenTool, TrendingUp, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import styles from './page.module.css';
 
-const stats = [
-  { id: 1, title: 'Total Revenue', value: '₹ 12,45,000', icon: IndianRupee, trend: '+15%' },
-  { id: 2, title: 'Total Orders', value: '142', icon: ShoppingCart, trend: '+8%' },
-  { id: 3, title: 'Total Products', value: '86', icon: Package, trend: '0%' },
-  { id: 4, title: 'Pending Orders', value: '12', icon: Clock, trend: '-5%' },
-  { id: 5, title: 'Design Requests', value: '8', icon: PenTool, trend: '+20%' },
-  { id: 6, title: 'New Feedback', value: '24', icon: MessageSquare, trend: '+12%' },
-];
-
-const bestSellers = [
-  { id: 'ORD-001', name: 'Eternity Diamond Band', category: 'Rings', sales: 45, revenue: '₹ 20,25,000', status: 'In Stock' },
-  { id: 'ORD-002', name: 'Royal Solitaire Necklace', category: 'Necklaces', sales: 28, revenue: '₹ 35,00,000', status: 'Low Stock' },
-  { id: 'ORD-003', name: 'Diamond Tennis Bracelet', category: 'Bangles', sales: 32, revenue: '₹ 91,20,000', status: 'In Stock' },
-  { id: 'ORD-004', name: 'Vintage Rose Cut Earrings', category: 'Earrings', sales: 18, revenue: '₹ 11,70,000', status: 'Out of Stock' },
-];
-
 export default function AdminDashboard() {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any[]>([]);
+  const [recentInventory, setRecentInventory] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    
+    // Fetch real data from Supabase
+    const { data: orders } = await (supabase.from('orders') as any).select('*');
+    const { count: productCount } = await (supabase.from('products') as any).select('*', { count: 'exact', head: true });
+    const { count: requestCount } = await (supabase.from('custom_requests') as any).select('*', { count: 'exact', head: true });
+    const { count: feedbackCount } = await (supabase.from('feedbacks') as any).select('*', { count: 'exact', head: true });
+
+    const totalRevenue = (orders || []).reduce((acc: number, curr: any) => acc + (curr.total_amount || 0), 0);
+    const pendingOrdersCount = (orders || []).filter((o: any) => o.status?.toLowerCase() === 'pending').length;
+
+    const newStats = [
+      { id: 1, title: 'Total Revenue', value: `₹ ${totalRevenue.toLocaleString('en-IN')}`, icon: IndianRupee },
+      { id: 2, title: 'Total Orders', value: (orders || []).length.toString(), icon: ShoppingCart },
+      { id: 3, title: 'Total Products', value: (productCount || 0).toString(), icon: Package },
+      { id: 4, title: 'Pending Orders', value: pendingOrdersCount.toString(), icon: Clock },
+      { id: 5, title: 'Design Requests', value: (requestCount || 0).toString(), icon: PenTool },
+      { id: 6, title: 'Customer Feedback', value: (feedbackCount || 0).toString(), icon: MessageSquare },
+    ];
+
+    setStats(newStats);
+
+    // Fetch recent inventory
+    const { data: products } = await (supabase.from('products') as any)
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    setRecentInventory(products || []);
+
+    setLoading(false);
+  };
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: '1rem' }}>
+      <Loader2 className="spin" size={48} color="var(--color-gold-dark)" />
+      <p style={{ color: '#666' }}>Fetching real-time analytics...</p>
+      <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+
   return (
     <div className={styles.dashboard}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Dashboard Overview</h1>
-          <p className={styles.subtitle}>Welcome back to Aura Admin. Here's what's happening today.</p>
-        </div>
-        <div className={styles.headerActions}>
-          <button className={styles.btnPrimary}>+ Add Product</button>
+          <h1 className={styles.title}>Admin Analytics</h1>
+          <p className={styles.subtitle}>Live performance overview of Aura Fine Jewellery.</p>
         </div>
       </header>
 
@@ -35,7 +68,6 @@ export default function AdminDashboard() {
       <div className={styles.statsGrid}>
         {stats.map(stat => {
           const Icon = stat.icon;
-          const isPositive = stat.trend.startsWith('+');
           return (
             <div key={stat.id} className={styles.statCard}>
               <div className={styles.statHeader}>
@@ -48,8 +80,9 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className={styles.statFooter}>
-                <span className={`${styles.trend} ${isPositive ? styles.positive : styles.negative}`}>
-                  {stat.trend} from last month
+                <span className={styles.trend} style={{ color: '#166534', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <TrendingUp size={14} />
+                  Live Sync Active
                 </span>
               </div>
             </div>
@@ -57,38 +90,35 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      {/* Tables Section */}
       <div className={styles.sectionsGrid}>
-        {/* Best Sellers */}
+        {/* Recent Inventory Table */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Best Selling Products</h3>
-            <button className={styles.btnLink}>View All</button>
+            <h3 className={styles.cardTitle}>Recent Inventory</h3>
+            <button className={styles.btnLink} onClick={() => window.location.href='/admin/products'}>View All Products</button>
           </div>
           <div className={styles.tableContainer}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Product Name</th>
-                  <th>Category</th>
-                  <th>Sales</th>
-                  <th>Revenue</th>
+                  <th>Product</th>
+                  <th>Price</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {bestSellers.map(product => (
+                {recentInventory.length === 0 ? (
+                  <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>No products found.</td></tr>
+                ) : recentInventory.map(product => (
                   <tr key={product.id}>
                     <td className={styles.productName}>{product.name}</td>
-                    <td>{product.category}</td>
-                    <td>{product.sales}</td>
-                    <td>{product.revenue}</td>
+                    <td>₹ {product.price.toLocaleString('en-IN')}</td>
                     <td>
                       <span className={`${styles.badge} ${
-                        product.status === 'In Stock' ? styles.badgeSuccess : 
-                        product.status === 'Low Stock' ? styles.badgeWarning : styles.badgeDanger
+                        (product.stock || 0) > 10 ? styles.badgeSuccess : 
+                        (product.stock || 0) > 0 ? styles.badgeWarning : styles.badgeDanger
                       }`}>
-                        {product.status}
+                        {(product.stock || 0) > 0 ? `${product.stock} in stock` : 'Out of Stock'}
                       </span>
                     </td>
                   </tr>
@@ -98,22 +128,16 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Recent Activity / Chart Placeholder */}
+        {/* Revenue Chart Placeholder */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Revenue Analytics</h3>
+            <h3 className={styles.cardTitle}>Sales Performance</h3>
           </div>
-          <div className={styles.chartPlaceholder}>
-            <div className={styles.bars}>
-              <div className={styles.bar} style={{ height: '40%' }}></div>
-              <div className={styles.bar} style={{ height: '60%' }}></div>
-              <div className={styles.bar} style={{ height: '35%' }}></div>
-              <div className={styles.bar} style={{ height: '80%' }}></div>
-              <div className={styles.bar} style={{ height: '55%' }}></div>
-              <div className={styles.bar} style={{ height: '90%' }}></div>
-              <div className={styles.bar} style={{ height: '70%' }}></div>
+          <div className={styles.chartPlaceholder} style={{ background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ textAlign: 'center', color: '#999' }}>
+               <IndianRupee size={48} style={{ marginBottom: '1rem', opacity: 0.1 }} />
+               <p style={{ fontSize: '0.9rem' }}>Detailed sales charts will generate <br /> as order volume increases.</p>
             </div>
-            <p className={styles.chartCaption}>Showing revenue trend for the last 7 days</p>
           </div>
         </div>
       </div>

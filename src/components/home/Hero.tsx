@@ -11,9 +11,10 @@ const Hero = () => {
       <div className={styles.imageWrapper}>
         <Image 
           src="/hero.png" 
-          alt="Luxury Diamond Necklace" 
+          alt="Luxury Diamond Jewellery - Aura"
           fill
           priority
+          sizes="100vw"
           className={styles.heroImage}
         />
         <div className={styles.overlay}></div>
@@ -33,15 +34,18 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
+          style={{ whiteSpace: 'pre-line' }}
         >
-          Elegance <br /> Redefined.
+          {"Elegance \n Redefined."}
         </motion.h1>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <button className="btn-primary">Explore Collection</button>
+          <a href="/category">
+            <button className="btn-primary">Explore Collection</button>
+          </a>
         </motion.div>
       </div>
     </section>

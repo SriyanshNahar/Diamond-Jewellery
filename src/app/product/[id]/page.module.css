@@ -202,4 +202,14 @@
     grid-template-columns: 1fr;
     gap: 3rem;
   }
+  
+  .imageGallery {
+    flex-direction: column-reverse;
+  }
+
+  .thumbnails {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
 }

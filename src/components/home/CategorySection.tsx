@@ -6,46 +6,23 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import styles from './CategorySection.module.css';
 
-const categories = [
-  {
-    id: 1,
-    title: 'Diamond Rings',
-    image: '/rings.png',
-    link: '/category/rings'
-  },
-  {
-    id: 2,
-    title: 'Diamond Necklaces',
-    image: '/necklaces.png',
-    link: '/category/necklaces'
-  },
-  {
-    id: 3,
-    title: 'Diamond Watches',
-    image: '/watches.png',
-    link: '/category/watches'
-  },
-  {
-    id: 4,
-    title: 'Diamond Bangles',
-    image: '/bangles.png',
-    link: '/category/bangles'
-  },
-  {
-    id: 5,
-    title: 'Diamond Earrings',
-    image: '/earrings.png',
-    link: '/category/earrings'
-  },
-  {
-    id: 6,
-    title: 'Other Jewellery',
-    image: '/rings.png', // Fallback image for 'other'
-    link: '/category/other'
-  }
-];
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  img: string;
+}
 
-const CategorySection = () => {
+const CategorySection = ({ initialCategories }: { initialCategories?: Category[] }) => {
+  const displayCategories = initialCategories || [
+    { id: 1, name: 'Diamond Rings', img: '/rings.png', slug: 'rings' },
+    { id: 2, name: 'Diamond Necklaces', img: '/necklaces.png', slug: 'necklaces' },
+    { id: 3, name: 'Diamond Watches', img: '/watches.png', slug: 'watches' },
+    { id: 4, name: 'Diamond Bangles', img: '/bangles.png', slug: 'bangles' },
+    { id: 5, name: 'Diamond Earrings', img: '/earrings.png', slug: 'earrings' },
+    { id: 6, name: 'Other Jewellery', img: '/rings.png', slug: 'other' }
+  ];
+
   return (
     <section className={styles.section}>
       <div className="container">
@@ -63,7 +40,7 @@ const CategorySection = () => {
         </div>
 
         <div className={styles.grid}>
-          {categories.map((cat, index) => (
+          {displayCategories.map((cat, index) => (
             <motion.div 
               key={cat.id}
               className={styles.card}
@@ -72,19 +49,20 @@ const CategorySection = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
             >
-              <Link href={cat.link} className={styles.cardLink}>
+              <Link href={`/category/${cat.slug}`} className={styles.cardLink}>
                 <div className={styles.imageContainer}>
                   <Image 
-                    src={cat.image} 
-                    alt={cat.title} 
+                    src={cat.img} 
+                    alt={cat.name} 
                     fill 
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     className={styles.image}
                   />
                   <div className={styles.overlay}>
                     <span className={styles.exploreBtn}>Explore</span>
                   </div>
                 </div>
-                <h3 className={styles.cardTitle}>{cat.title}</h3>
+                <h3 className={styles.cardTitle}>{cat.name}</h3>
               </Link>
             </motion.div>
           ))}
