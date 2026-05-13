@@ -79,6 +79,7 @@
   color: var(--color-gray);
   font-size: 0.95rem;
   line-height: 1.5;
+  word-break: break-word;
 }
 
 .formSection {
@@ -142,7 +143,16 @@
 @media (max-width: 968px) {
   .grid {
     grid-template-columns: 1fr;
-    padding: 2rem;
-    gap: 3rem;
+    padding: 1.5rem;
+    gap: 2.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .grid {
+    padding: 1rem;
+    gap: 2rem;
+  }
+  .contactItem {
+    gap: 1rem;
   }
 }

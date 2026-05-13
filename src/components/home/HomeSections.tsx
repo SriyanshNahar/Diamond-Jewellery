@@ -129,7 +129,9 @@ export const PromoBanners = () => {
             <Image src="/rings.png" alt="Most Gifted" fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover', opacity: 0.3, mixBlendMode: 'overlay' }} />
             <div style={{ position: 'relative', zIndex: 10 }}>
               <h3 style={{ fontStyle: 'italic', fontSize: '2rem', marginBottom: '1rem' }}>Most<br/>GIFTED</h3>
-              <button style={{ background: 'white', color: '#a04856', padding: '0.5rem 1rem', border: 'none', borderRadius: '20px', width: 'fit-content', fontWeight: 'bold', cursor: 'pointer' }}>Explore now</button>
+              <Link href="/category/rings" style={{ textDecoration: 'none' }}>
+                <button style={{ background: 'white', color: '#a04856', padding: '0.5rem 1rem', border: 'none', borderRadius: '20px', width: 'fit-content', fontWeight: 'bold', cursor: 'pointer' }}>Explore now</button>
+              </Link>
             </div>
           </div>
           
@@ -138,7 +140,9 @@ export const PromoBanners = () => {
             <Image src="/bangles.png" alt="Precious Fragrances" fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover', opacity: 0.4, mixBlendMode: 'overlay' }} />
             <div style={{ position: 'relative', zIndex: 10 }}>
               <h3 style={{ fontStyle: 'italic', fontSize: '1.8rem', marginBottom: '1rem' }}>Precious<br/>Fragrances</h3>
-              <button style={{ background: 'white', color: '#7e1828', padding: '0.5rem 1rem', border: 'none', borderRadius: '20px', width: 'fit-content', fontWeight: 'bold', cursor: 'pointer' }}>Explore now</button>
+              <Link href="/category/necklaces" style={{ textDecoration: 'none' }}>
+                <button style={{ background: 'white', color: '#7e1828', padding: '0.5rem 1rem', border: 'none', borderRadius: '20px', width: 'fit-content', fontWeight: 'bold', cursor: 'pointer' }}>Explore now</button>
+              </Link>
             </div>
           </div>
         </div>
@@ -149,7 +153,9 @@ export const PromoBanners = () => {
           <div style={{ position: 'relative', zIndex: 10, background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', margin: '-3rem', padding: '3rem', paddingTop: '10rem', color: 'white' }}>
             <h3 style={{ fontStyle: 'italic', fontSize: '2.5rem', marginBottom: '0.5rem' }}>Bestsellers</h3>
             <p style={{ marginBottom: '1rem', opacity: 0.9 }}>most loved pure diamond picks</p>
-            <button style={{ background: 'white', color: 'var(--color-black)', padding: '0.5rem 1.5rem', border: 'none', borderRadius: '20px', width: 'fit-content', fontWeight: 'bold', cursor: 'pointer' }}>Shop now</button>
+            <Link href="/category/earrings" style={{ textDecoration: 'none' }}>
+              <button style={{ background: 'white', color: 'var(--color-black)', padding: '0.5rem 1.5rem', border: 'none', borderRadius: '20px', width: 'fit-content', fontWeight: 'bold', cursor: 'pointer' }}>Shop now</button>
+            </Link>
           </div>
         </div>
       </div>
@@ -163,12 +169,14 @@ export const ShopByBond = () => {
       <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.5rem', color: 'var(--color-black)' }}>Shop by Bond</h2>
       <div className="grid-responsive" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
         {bonds.map((bond, idx) => (
-          <div key={idx} style={{ background: 'var(--color-gray-light)', borderRadius: '8px', overflow: 'hidden', position: 'relative', aspectRatio: '4/5' }}>
-            <Image src={bond.img} alt={bond.name} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(255,255,255,0.9)', padding: '0.8rem', textAlign: 'center', fontWeight: 'bold', color: 'var(--color-black)' }}>
-              {bond.name}
+          <Link href="/category/other" key={idx} style={{ textDecoration: 'none' }}>
+            <div style={{ background: 'var(--color-gray-light)', borderRadius: '8px', overflow: 'hidden', position: 'relative', aspectRatio: '4/5' }}>
+              <Image src={bond.img} alt={bond.name} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(255,255,255,0.9)', padding: '0.8rem', textAlign: 'center', fontWeight: 'bold', color: 'var(--color-black)' }}>
+                {bond.name}
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

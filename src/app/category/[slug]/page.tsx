@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 import styles from './page.module.css';
 
 const getCategoryTitle = (slug: string) => {
@@ -15,22 +16,6 @@ const getCategoryTitle = (slug: string) => {
   return map[slug] || 'Diamond Jewellery';
 };
 
-const getProductsForCategory = (slug: string) => {
-  // If the slug matches a known image, use it. Otherwise default to rings.
-  const knownSlugs = ['rings', 'bangles', 'watches', 'necklaces', 'earrings'];
-  const imageToUse = knownSlugs.includes(slug) ? `/${slug}.png` : '/rings.png';
-  const titleToUse = getCategoryTitle(slug).replace('Diamond ', '');
-
-  return [
-    { id: 1, name: `Eternity ${titleToUse}`, price: '₹ 45,000', image: imageToUse },
-    { id: 2, name: `Royal ${titleToUse}`, price: '₹ 1,25,000', image: imageToUse },
-    { id: 3, name: `Classic ${titleToUse}`, price: '₹ 85,000', image: imageToUse },
-    { id: 4, name: `Vintage ${titleToUse}`, price: '₹ 65,000', image: imageToUse },
-    { id: 5, name: `Minimalist ${titleToUse}`, price: '₹ 35,000', image: imageToUse },
-    { id: 6, name: `Luxury ${titleToUse}`, price: '₹ 1,50,000', image: imageToUse },
-  ];
-};
-
 export default async function CategoryDetail({
   params,
 }: {
@@ -38,7 +23,35 @@ export default async function CategoryDetail({
 }) {
   const resolvedParams = await params;
   const title = getCategoryTitle(resolvedParams.slug);
-  const products = getProductsForCategory(resolvedParams.slug);
+
+  // Fetch Category
+  const { data: category } = await supabase
+    .from('categories')
+    .select('id')
+    .eq('slug', resolvedParams.slug)
+    .single();
+
+  let products = [];
+  if (category) {
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .eq('category_id', category.id);
+    products = data || [];
+  } else {
+    // fallback to fetch all products for 'other' or unmatched
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .limit(20);
+    products = data || [];
+  }
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency', currency: 'INR', maximumFractionDigits: 0
+    }).format(price);
+  };
 
   return (
     <div className={styles.container}>
@@ -50,32 +63,35 @@ export default async function CategoryDetail({
 
       <div className="container">
         {/* Filters and Sorting bar */}
-        <div className={styles.toolbar}>
-          <div className={styles.filterBtn}>Filter / Sort</div>
-          <div className={styles.resultsCount}>{products.length} Results</div>
+        <div className={styles.toolbar} style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0', borderBottom: '1px solid #eee', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <div className={styles.filterBtn} style={{ cursor: 'pointer', fontWeight: 'bold' }}>Filter / Sort</div>
+          <div className={styles.resultsCount} style={{ color: '#666' }}>{products.length} Results</div>
         </div>
 
         {/* Product Grid */}
-        <div className={styles.grid}>
-          {products.map((product) => (
-            <Link href={`/product/${product.id}`} key={product.id} className={styles.productCard}>
-              <div className={styles.imageBox}>
+        <div className={styles.grid} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
+          {products.map((product: any) => (
+            <Link href={`/product/${product.id}`} key={product.id} className={styles.productCard} style={{ display: 'block', border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
+              <div className={styles.imageBox} style={{ position: 'relative', width: '100%', aspectRatio: '1' }}>
                 <Image 
-                  src={product.image} 
+                  src={product.img || '/rings.png'} 
                   alt={product.name} 
                   fill 
                   className={styles.productImage} 
+                  style={{ objectFit: 'cover' }}
                 />
-                <div className={styles.hoverActions}>
-                  <button className={styles.actionBtn}>View Details</button>
-                </div>
               </div>
-              <div className={styles.productInfo}>
-                <h3 className={styles.productName}>{product.name}</h3>
-                <p className={styles.productPrice}>{product.price}</p>
+              <div className={styles.productInfo} style={{ padding: '1rem' }}>
+                <h3 className={styles.productName} style={{ fontSize: '1rem', marginBottom: '0.5rem', color: '#111' }}>{product.name}</h3>
+                <p className={styles.productPrice} style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>{formatPrice(product.price)}</p>
               </div>
             </Link>
           ))}
+          {products.length === 0 && (
+            <div style={{ padding: '2rem', textAlign: 'center', gridColumn: '1 / -1' }}>
+              <p>No products found in this category.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -82,16 +82,16 @@ export default function CustomDesignPage() {
     <div style={{ padding: '10rem 2rem 5rem', minHeight: '100vh', background: '#fdfcfb' }}>
       <div className="container" style={{ maxWidth: '1200px' }}>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem', alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3rem', alignItems: 'start' }}>
           
           {/* Left Side: Upload Grid */}
-          <div style={{ background: 'white', padding: '2.5rem', borderRadius: '16px', border: '1px solid #eee', boxShadow: '0 15px 40px rgba(0,0,0,0.03)' }}>
+          <div style={{ flex: '1.2 1 300px', background: 'white', padding: 'clamp(1.2rem, 4vw, 2.5rem)', borderRadius: '16px', border: '1px solid #eee', boxShadow: '0 15px 40px rgba(0,0,0,0.03)' }}>
             <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.8rem', marginBottom: '2rem', color: '#1a1a1a' }}>Upload Your Designs</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '1.5rem' }}>
               {images.map((img, index) => (
                 <div key={index} style={{ 
                   position: 'relative', 
-                  aspectRatio: '4/3', 
+                  aspectRatio: '1', 
                   border: '2px dashed #e0e0e0', 
                   borderRadius: '12px', 
                   overflow: 'hidden',
@@ -100,14 +100,14 @@ export default function CustomDesignPage() {
                   justifyContent: 'center',
                   background: '#fafafa',
                   transition: 'all 0.3s ease',
-                  gridColumn: index === 4 ? 'span 2' : 'auto'
+                  gridColumn: index === 4 ? '1 / -1' : 'auto'
                 }}>
                   {img ? (
                     <img src={img} alt={`Design ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <label style={{ cursor: 'pointer', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: '0.9rem' }}>
-                      <Upload size={28} style={{ marginBottom: '0.8rem', opacity: 0.6 }} />
-                      <span style={{ fontWeight: '500' }}>Design {index + 1}</span>
+                      <Upload size={24} style={{ marginBottom: '0.8rem', opacity: 0.6 }} />
+                      <span style={{ fontWeight: '500', textAlign: 'center', fontSize: '0.8rem' }}>Design {index + 1}</span>
                       <input type="file" hidden accept="image/*" onChange={(e) => handleImageChange(index, e)} />
                     </label>
                   )}
@@ -118,7 +118,7 @@ export default function CustomDesignPage() {
           </div>
 
           {/* Right Side: Form Details */}
-          <div style={{ background: 'white', padding: '2.5rem', borderRadius: '16px', border: '1px solid #eee', boxShadow: '0 15px 40px rgba(0,0,0,0.03)' }}>
+          <div style={{ flex: '1 1 300px', background: 'white', padding: 'clamp(1.2rem, 4vw, 2.5rem)', borderRadius: '16px', border: '1px solid #eee', boxShadow: '0 15px 40px rgba(0,0,0,0.03)' }}>
             <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.8rem', marginBottom: '2rem', color: '#1a1a1a' }}>Your Custom Design Details</h2>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Star, ShieldCheck, Truck, RotateCcw, PlayCircle, Heart, ShoppingBag } from 'lucide-react';
+import Link from 'next/link';
 import { use } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '@/context/CartContext';
@@ -11,13 +12,14 @@ import styles from './page.module.css';
 export default function ProductDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const params = use(paramsPromise);
   const [product, setProduct] = useState<any>(null);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeMedia, setActiveMedia] = useState<any>(null);
   const [zoom, setZoom] = useState(false);
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductAndRecs = async () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -31,10 +33,24 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         
         setProduct({ ...(data as any), media });
         setActiveMedia(media[0]);
+
+        // Fetch Recommendations
+        let recQuery = supabase.from('products').select('*').neq('id', params.id).limit(4);
+        if (data.category_id) {
+            recQuery = recQuery.eq('category_id', data.category_id);
+        }
+        const { data: recData } = await recQuery;
+        if (recData && recData.length > 0) {
+            setRecommendations(recData);
+        } else {
+            // fallback if no products in same category
+            const { data: allData } = await supabase.from('products').select('*').neq('id', params.id).limit(4);
+            if (allData) setRecommendations(allData);
+        }
       }
       setLoading(false);
     };
-    fetchProduct();
+    fetchProductAndRecs();
   }, [params.id]);
 
   const formatPrice = (price: number) => {
@@ -166,54 +182,26 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         </div>
 
         {/* Product Recommendations */}
-        <div style={{ marginTop: '5rem', borderTop: '1px solid var(--color-gray-light)', paddingTop: '4rem' }}>
-          <h2 className={styles.sectionTitle} style={{ textAlign: 'center', marginBottom: '3rem' }}>You May Also Like</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
-            {/* Recommendation 1 */}
-            <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                <Image src="/rings.png" alt="Princess Cut Ring" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
-              </div>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Princess Cut Halo Ring</h3>
-                <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 85,000</p>
-              </div>
-            </div>
-
-            {/* Recommendation 2 */}
-            <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                <Image src="/watches.png" alt="Diamond Watch" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
-              </div>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Oyster Perpetual Diamond</h3>
-                <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 5,20,000</p>
-              </div>
-            </div>
-
-            {/* Recommendation 3 */}
-            <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                <Image src="/earrings.png" alt="Diamond Earrings" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
-              </div>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Vintage Drop Earrings</h3>
-                <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 1,15,000</p>
-              </div>
-            </div>
-
-            {/* Recommendation 4 */}
-            <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden' }}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                <Image src="/necklaces.png" alt="Diamond Necklace" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
-              </div>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>Solitaire Pendant</h3>
-                <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>₹ 65,000</p>
-              </div>
+        {recommendations.length > 0 && (
+          <div style={{ marginTop: '5rem', borderTop: '1px solid var(--color-gray-light)', paddingTop: '4rem' }}>
+            <h2 className={styles.sectionTitle} style={{ textAlign: 'center', marginBottom: '3rem' }}>You May Also Like</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
+              {recommendations.map((rec: any) => (
+                <Link href={`/product/${rec.id}`} key={rec.id} style={{ textDecoration: 'none' }}>
+                  <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden', height: '100%' }}>
+                    <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
+                      <Image src={rec.img || '/rings.png'} alt={rec.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
+                    </div>
+                    <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                      <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>{rec.name}</h3>
+                      <p style={{ fontWeight: 'bold', color: 'var(--color-gold-dark)' }}>{formatPrice(rec.price)}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Reviews Section Placeholder */}
         <div className={styles.reviewsSection}>
