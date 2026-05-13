@@ -36,8 +36,8 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
 
         // Fetch Recommendations
         let recQuery = supabase.from('products').select('*').neq('id', params.id).limit(4);
-        if (data.category_id) {
-            recQuery = recQuery.eq('category_id', data.category_id);
+        if ((data as any).category_id) {
+            recQuery = recQuery.eq('category_id', (data as any).category_id);
         }
         const { data: recData } = await recQuery;
         if (recData && recData.length > 0) {

@@ -31,12 +31,12 @@ export default async function CategoryDetail({
     .eq('slug', resolvedParams.slug)
     .single();
 
-  let products = [];
+  let products: any[] = [];
   if (category) {
     const { data } = await supabase
       .from('products')
       .select('*')
-      .eq('category_id', category.id);
+      .eq('category_id', (category as any).id);
     products = data || [];
   } else {
     // fallback to fetch all products for 'other' or unmatched

@@ -195,7 +195,9 @@ export const AboutLegacy = () => {
           <p style={{ color: 'var(--color-gray)', lineHeight: '1.8', marginBottom: '2rem' }}>
             Having ventured into luxury jewellery retailing, we have expanded globally, setting the standard for purity and unparalleled craftsmanship.
           </p>
-          <button style={{ background: 'transparent', border: '1px solid var(--color-black)', padding: '0.8rem 2rem', cursor: 'pointer', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.8rem' }}>VIEW MORE</button>
+          <Link href="/about" style={{ textDecoration: 'none' }}>
+            <button style={{ background: 'transparent', border: '1px solid var(--color-black)', padding: '0.8rem 2rem', cursor: 'pointer', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.8rem', color: 'var(--color-black)' }}>VIEW MORE</button>
+          </Link>
         </div>
         <div style={{ background: '#d32f2f', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
           <p style={{ fontSize: '1.2rem', letterSpacing: '2px' }}>OVER</p>
