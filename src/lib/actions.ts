@@ -6,8 +6,7 @@ export async function getBestsellers() {
     .select('*')
     .eq('is_bestseller', true);
 
-  if (error) {
-    console.error('Error fetching bestsellers:', error);
+  if (error || !data) {
     return [];
   }
 
@@ -19,9 +18,8 @@ export async function getCategories() {
     .from('categories')
     .select('*');
 
-  if (error) {
-    console.error('Error fetching categories:', error);
-    return [];
+  if (error || !data || data.length === 0) {
+    return undefined;
   }
 
   return data;
@@ -33,8 +31,7 @@ export async function getAllProducts() {
     .select('*, categories(name)')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching products:', error);
+  if (error || !data) {
     return [];
   }
 
@@ -48,7 +45,6 @@ export async function deleteProduct(id: number) {
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting product:', error);
     return false;
   }
 
