@@ -62,6 +62,8 @@ export default function ProductsPage() {
   };
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [newProduct, setNewProduct] = useState<any>({
     name: '',
@@ -75,12 +77,12 @@ export default function ProductsPage() {
     stock_count: 10
   });
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, isEditing: boolean = false) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploadingFile(true);
-    const newImages = [...newProduct.images];
+    const newImages = [...(isEditing ? editingProduct.images || [editingProduct.img] : newProduct.images)];
 
     for (let i = 0; i < files.length; i++) {
       if (newImages.length >= 5) break;
@@ -102,15 +104,68 @@ export default function ProductsPage() {
       }
     }
     
-    setNewProduct({ ...newProduct, images: newImages });
+    if (isEditing) {
+      setEditingProduct({ ...editingProduct, images: newImages });
+    } else {
+      setNewProduct({ ...newProduct, images: newImages });
+    }
     setUploadingFile(false);
   };
 
-  const removeImage = (index: number) => {
-    setNewProduct({
-      ...newProduct,
-      images: newProduct.images.filter((_: any, i: number) => i !== index)
+  const removeImage = (index: number, isEditing: boolean = false) => {
+    if (isEditing) {
+      setEditingProduct({
+        ...editingProduct,
+        images: editingProduct.images.filter((_: any, i: number) => i !== index)
+      });
+    } else {
+      setNewProduct({
+        ...newProduct,
+        images: newProduct.images.filter((_: any, i: number) => i !== index)
+      });
+    }
+  };
+
+  const openEditModal = (prod: any) => {
+    setEditingProduct({
+      ...prod,
+      images: prod.images || [prod.img]
     });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct.images || editingProduct.images.length === 0) {
+      alert('Please upload at least one image');
+      return;
+    }
+    setIsUploading(true);
+    
+    const productToUpdate = {
+      name: editingProduct.name,
+      price: editingProduct.price,
+      images: editingProduct.images,
+      img: editingProduct.images[0],
+      category_id: editingProduct.category_id,
+      promo: editingProduct.promo,
+      is_bestseller: editingProduct.is_bestseller,
+      stock_count: editingProduct.stock_count,
+    };
+
+    const { data, error } = await (supabase.from('products') as any)
+      .update(productToUpdate)
+      .eq('id', editingProduct.id)
+      .select();
+
+    if (!error) {
+      setProducts(products.map(p => p.id === editingProduct.id ? data[0] : p));
+      setIsEditModalOpen(false);
+      setEditingProduct(null);
+    } else {
+      alert('Error updating product: ' + error.message);
+    }
+    setIsUploading(false);
   };
 
   const handleAddProduct = async (e: React.FormEvent) => {
@@ -239,7 +294,7 @@ export default function ProductsPage() {
                     type="file" 
                     multiple 
                     accept="image/*" 
-                    onChange={handleFileChange} 
+                    onChange={(e) => handleFileChange(e, false)} 
                     disabled={uploadingFile || newProduct.images.length >= 5}
                     style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} 
                   />
@@ -250,7 +305,7 @@ export default function ProductsPage() {
                         <img src={url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <button 
                           type="button" 
-                          onClick={() => removeImage(index)}
+                          onClick={() => removeImage(index, false)}
                           style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
                           ✕
@@ -264,6 +319,54 @@ export default function ProductsPage() {
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <button type="button" onClick={() => setIsAddModalOpen(false)} style={{ flex: 1, padding: '0.8rem' }}>Cancel</button>
                   <button type="submit" className="btn-primary" style={{ flex: 1, padding: '0.8rem' }} disabled={isUploading}>Add Product</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {isEditModalOpen && editingProduct && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'white', padding: '2rem', borderRadius: '8px', width: '500px', maxWidth: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+              <h2 style={{ marginBottom: '1.5rem' }}>Edit Product</h2>
+              <form onSubmit={handleEditProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <input required placeholder="Product Name" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} />
+                <input type="number" required placeholder="Price (₹)" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: parseFloat(e.target.value)})} />
+                <select style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={editingProduct.category_id || ''} onChange={e => setEditingProduct({...editingProduct, category_id: parseInt(e.target.value) || null})}>
+                  <option value="">Select Collection</option>
+                  {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
+                </select>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>Product Images (Up to 5)</label>
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    onChange={(e) => handleFileChange(e, true)} 
+                    disabled={uploadingFile || (editingProduct.images && editingProduct.images.length >= 5)}
+                    style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} 
+                  />
+                  {uploadingFile && <p style={{ fontSize: '0.8rem', color: 'var(--color-gold-dark)' }}>Uploading images...</p>}
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                    {editingProduct.images && editingProduct.images.map((url: string, index: number) => (
+                      <div key={index} style={{ position: 'relative', width: '60px', height: '60px', border: '1px solid #eee', borderRadius: '4px', overflow: 'hidden' }}>
+                        <img src={url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button 
+                          type="button" 
+                          onClick={() => removeImage(index, true)}
+                          style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <input placeholder="Promo Text" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={editingProduct.promo || ''} onChange={e => setEditingProduct({...editingProduct, promo: e.target.value})} />
+                <label><input type="checkbox" checked={editingProduct.is_bestseller || false} onChange={e => setEditingProduct({...editingProduct, is_bestseller: e.target.checked})} /> Mark as Bestseller</label>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button type="button" onClick={() => setIsEditModalOpen(false)} style={{ flex: 1, padding: '0.8rem' }}>Cancel</button>
+                  <button type="submit" className="btn-primary" style={{ flex: 1, padding: '0.8rem' }} disabled={isUploading}>Save Changes</button>
                 </div>
               </form>
             </motion.div>
@@ -290,7 +393,8 @@ export default function ProductsPage() {
                   <td style={{ padding: '1rem' }}><img src={prod.img} style={{ width: '40px', height: '40px', objectFit: 'cover' }} /></td>
                   <td style={{ padding: '1rem' }}>{prod.name}</td>
                   <td style={{ padding: '1rem' }}>{formatPrice(prod.price)}</td>
-                  <td style={{ padding: '1rem' }}>
+                  <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => openEditModal(prod)} style={{ color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer' }}><Edit size={16} /></button>
                     <button onClick={() => handleDelete(prod.id)} style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={16} /></button>
                   </td>
                 </tr>
