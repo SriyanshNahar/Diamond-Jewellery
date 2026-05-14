@@ -43,6 +43,12 @@ export default function CartPage() {
   const tax = (subtotal - discountAmount) * 0.03; // 3% GST on jewellery
   const total = subtotal - discountAmount + tax;
 
+  const getValidImg = (url: string | undefined | null) => {
+    if (!url) return '/rings.png';
+    if (url.startsWith('http') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
   const handleCheckout = async () => {
     if (!user) {
       openAuthModal();
@@ -105,7 +111,7 @@ export default function CartPage() {
               {cart.map(item => (
                 <div key={item.id} style={{ display: 'flex', gap: '1.5rem', background: 'var(--color-white)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--color-gray-light)' }}>
                   <div style={{ position: 'relative', width: '100px', height: '100px', background: 'var(--color-beige)', borderRadius: '4px', overflow: 'hidden' }}>
-                    <Image src={item.img} alt={item.name} fill sizes="100px" style={{ objectFit: 'cover' }} />
+                    <Image src={getValidImg(item.img)} alt={item.name} fill sizes="100px" style={{ objectFit: 'cover' }} />
                   </div>
                   
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>

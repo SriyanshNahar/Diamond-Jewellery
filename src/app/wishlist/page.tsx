@@ -36,6 +36,12 @@ export default function WishlistPage() {
     toggleWishlist(product.id);
   };
 
+  const getValidImg = (url: string | undefined | null) => {
+    if (!url) return '/rings.png';
+    if (url.startsWith('http') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
   return (
     <div style={{ padding: '8rem 2rem 5rem', minHeight: '100vh', background: 'var(--background)' }}>
       <div className="container">
@@ -60,7 +66,7 @@ export default function WishlistPage() {
                 </button>
                 
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                  <Image src={item.img} alt={item.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: 'cover' }} />
+                  <Image src={getValidImg(item.img)} alt={item.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: 'cover' }} />
                 </div>
                 
                 <div style={{ padding: '1.5rem' }}>

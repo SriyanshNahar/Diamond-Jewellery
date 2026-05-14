@@ -48,6 +48,12 @@ export const Bestsellers = () => {
     }).format(price);
   };
 
+  const getValidImg = (url: string | undefined | null) => {
+    if (!url) return '/rings.png';
+    if (url.startsWith('http') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
   return (
     <section className="container" style={{ padding: '4rem 0' }}>
       <div style={{ background: 'var(--color-beige)', padding: '1rem', textAlign: 'center', marginBottom: '2rem', borderRadius: '4px' }}>
@@ -64,7 +70,7 @@ export const Bestsellers = () => {
               >
                 <Heart size={20} fill={isInWishlist(item.id) ? "var(--color-gold-dark)" : "none"} color="var(--color-gold-dark)" />
               </button>
-              <Image src={item.img} alt={item.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: 'cover' }} />
+              <Image src={getValidImg(item.img)} alt={item.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: 'cover' }} />
               <div className={styles.ratingBadge}>
                 {item.rating} <Star size={12} fill="var(--color-gold-dark)" color="var(--color-gold-dark)" /> | {item.reviews}
               </div>

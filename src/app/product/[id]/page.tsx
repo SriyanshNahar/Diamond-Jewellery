@@ -65,6 +65,12 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
     }).format(price);
   };
 
+  const getValidImg = (url: string | undefined | null) => {
+    if (!url) return '/rings.png';
+    if (url.startsWith('http') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
   if (loading) return <div style={{ padding: '10rem', textAlign: 'center' }}>Loading...</div>;
   if (!product) return <div style={{ padding: '10rem', textAlign: 'center' }}>Product not found</div>;
 
@@ -239,7 +245,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                 <Link href={`/product/${rec.id}`} key={rec.id} style={{ textDecoration: 'none' }}>
                   <div style={{ background: 'var(--color-white)', borderRadius: '8px', border: '1px solid var(--color-gray-light)', overflow: 'hidden', height: '100%' }}>
                     <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: 'var(--color-beige)' }}>
-                      <Image src={rec.img || '/rings.png'} alt={rec.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
+                      <Image src={getValidImg(rec.img)} alt={rec.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
                     </div>
                     <div style={{ padding: '1.5rem', textAlign: 'center' }}>
                       <h3 style={{ fontSize: '1.1rem', color: 'var(--color-black)', marginBottom: '0.5rem' }}>{rec.name}</h3>

@@ -23,6 +23,12 @@ const CategorySection = ({ initialCategories }: { initialCategories?: Category[]
     { id: 6, name: 'Other Jewellery', img: '/rings.png', slug: 'other' }
   ];
 
+  const getValidImg = (url: string | undefined | null) => {
+    if (!url) return '/rings.png';
+    if (url.startsWith('http') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
   return (
     <section className={styles.section}>
       <div className="container">
@@ -52,7 +58,7 @@ const CategorySection = ({ initialCategories }: { initialCategories?: Category[]
               <Link href={`/category/${cat.slug}`} className={styles.cardLink}>
                 <div className={styles.imageContainer}>
                   <Image 
-                    src={cat.img} 
+                    src={getValidImg(cat.img)} 
                     alt={cat.name} 
                     fill 
                     sizes="(max-width: 768px) 100vw, 33vw"

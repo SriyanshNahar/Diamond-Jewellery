@@ -53,6 +53,12 @@ export default async function CategoryDetail({
     }).format(price);
   };
 
+  const getValidImg = (url: string | undefined | null) => {
+    if (!url) return '/rings.png';
+    if (url.startsWith('http') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
   return (
     <div className={styles.container}>
       {/* Category Banner */}
@@ -74,7 +80,7 @@ export default async function CategoryDetail({
             <Link href={`/product/${product.id}`} key={product.id} className={styles.productCard} style={{ display: 'block', border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
               <div className={styles.imageBox} style={{ position: 'relative', width: '100%', aspectRatio: '1' }}>
                 <Image 
-                  src={product.img || '/rings.png'} 
+                  src={getValidImg(product.img)} 
                   alt={product.name} 
                   fill 
                   className={styles.productImage} 
