@@ -81,6 +81,7 @@ export default function ProductsPage() {
     name: '',
     price: 0,
     images: [],
+    img: '',
     is_bestseller: false,
     promo: '',
     rating: 4.5,
@@ -88,6 +89,41 @@ export default function ProductsPage() {
     category_id: null,
     stock_count: 10
   });
+
+  const getValidImg = (url: string | undefined | null) => {
+    if (!url) return '/rings.png';
+    if (url.startsWith('http') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>, isEditing: boolean = false) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `thumb_${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('product-images')
+      .upload(filePath, file);
+
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+        
+      if (isEditing) {
+        setEditingProduct({ ...editingProduct, img: publicUrl });
+      } else {
+        setNewProduct({ ...newProduct, img: publicUrl });
+      }
+    } else {
+      alert('Error uploading thumbnail: ' + error.message);
+    }
+    setUploadingFile(false);
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, isEditing: boolean = false) => {
     const files = e.target.files;
@@ -141,7 +177,8 @@ export default function ProductsPage() {
   const openEditModal = (prod: any) => {
     setEditingProduct({
       ...prod,
-      images: prod.images || [prod.img]
+      images: prod.images || [prod.img],
+      img: prod.img || ''
     });
     setIsEditModalOpen(true);
   };
@@ -158,7 +195,7 @@ export default function ProductsPage() {
       name: editingProduct.name,
       price: editingProduct.price,
       images: editingProduct.images,
-      img: editingProduct.images[0],
+      img: editingProduct.img || editingProduct.images[0],
       category_id: editingProduct.category_id,
       promo: editingProduct.promo,
       is_bestseller: editingProduct.is_bestseller,
@@ -188,10 +225,10 @@ export default function ProductsPage() {
     }
     setIsUploading(true);
     
-    // Set the first image as the main 'img' for backward compatibility
+    // Set the img field or fallback to first image
     const productToInsert = {
       ...newProduct,
-      img: newProduct.images[0]
+      img: newProduct.img || newProduct.images[0]
     };
 
     const { data, error } = await (supabase.from('products') as any)
@@ -301,6 +338,26 @@ export default function ProductsPage() {
                   {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
                 </select>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>Thumbnail Image (Main Photo)</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleThumbnailChange(e, false)} 
+                    disabled={uploadingFile}
+                    style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} 
+                  />
+                  {newProduct.img && (
+                    <div style={{ position: 'relative', width: '60px', height: '60px', border: '1px solid #eee', borderRadius: '4px', overflow: 'hidden', marginTop: '0.5rem' }}>
+                      <img src={getValidImg(newProduct.img)} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button 
+                        type="button" 
+                        onClick={() => setNewProduct({ ...newProduct, img: '' })}
+                        style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >✕</button>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   <label style={{ fontSize: '0.9rem', color: '#666' }}>Product Images (Up to 5)</label>
                   <input 
                     type="file" 
@@ -348,6 +405,26 @@ export default function ProductsPage() {
                   <option value="">Select Collection</option>
                   {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
                 </select>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>Thumbnail Image (Main Photo)</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleThumbnailChange(e, true)} 
+                    disabled={uploadingFile}
+                    style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} 
+                  />
+                  {editingProduct.img && (
+                    <div style={{ position: 'relative', width: '60px', height: '60px', border: '1px solid #eee', borderRadius: '4px', overflow: 'hidden', marginTop: '0.5rem' }}>
+                      <img src={getValidImg(editingProduct.img)} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button 
+                        type="button" 
+                        onClick={() => setEditingProduct({ ...editingProduct, img: '' })}
+                        style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >✕</button>
+                    </div>
+                  )}
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   <label style={{ fontSize: '0.9rem', color: '#666' }}>Product Images (Up to 5)</label>
                   <input 
@@ -403,7 +480,7 @@ export default function ProductsPage() {
             <tbody>
               {products.map(prod => (
                 <tr key={prod.id}>
-                  <td style={{ padding: '1rem' }}><img src={prod.img} style={{ width: '40px', height: '40px', objectFit: 'cover' }} /></td>
+                  <td style={{ padding: '1rem' }}><img src={getValidImg(prod.img)} style={{ width: '40px', height: '40px', objectFit: 'cover' }} /></td>
                   <td style={{ padding: '1rem' }}>{prod.name}</td>
                   <td style={{ padding: '1rem' }}>{formatPrice(prod.price)}</td>
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
