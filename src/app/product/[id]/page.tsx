@@ -15,7 +15,10 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeMedia, setActiveMedia] = useState<any>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [zoom, setZoom] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
 
   useEffect(() => {
@@ -33,6 +36,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
         
         setProduct({ ...(data as any), media });
         setActiveMedia(media[0]);
+        setActiveIndex(0);
 
         // Fetch Recommendations
         let recQuery = supabase.from('products').select('*').neq('id', params.id).limit(4);
@@ -64,8 +68,42 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
   if (loading) return <div style={{ padding: '10rem', textAlign: 'center' }}>Loading...</div>;
   if (!product) return <div style={{ padding: '10rem', textAlign: 'center' }}>Product not found</div>;
 
+  const handleNext = () => {
+    const nextIndex = (activeIndex + 1) % product.media.length;
+    setActiveIndex(nextIndex);
+    setActiveMedia(product.media[nextIndex]);
+  };
+
+  const handlePrev = () => {
+    const prevIndex = (activeIndex - 1 + product.media.length) % product.media.length;
+    setActiveIndex(prevIndex);
+    setActiveMedia(product.media[prevIndex]);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) handleNext();
+    if (isRightSwipe) handlePrev();
+    setTouchStart(null);
+  };
+
   return (
     <div className={styles.container}>
+      {lightboxOpen && activeMedia.type === 'image' && (
+        <div className={styles.lightbox} onClick={() => setLightboxOpen(false)}>
+          <div className={styles.lightboxClose}>✕</div>
+          <img src={activeMedia.url} alt={product.name} className={styles.lightboxImage} />
+        </div>
+      )}
       <div className="container">
         
         <div className={styles.productGrid}>
@@ -76,7 +114,7 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                 <div 
                   key={idx} 
                   className={`${styles.thumbnail} ${activeMedia.url === item.url ? styles.activeThumb : ''}`}
-                  onClick={() => { setActiveMedia(item); setZoom(false); }}
+                  onClick={() => { setActiveMedia(item); setActiveIndex(idx); setZoom(false); }}
                 >
                   {item.type === 'image' ? (
                     <Image src={item.url} alt="Thumbnail" fill sizes="80px" style={{ objectFit: 'cover' }} />
@@ -91,15 +129,15 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
             
             <div 
               className={`${styles.mainImageContainer} ${zoom && activeMedia.type === 'image' ? styles.zoomed : ''}`}
-              onClick={() => { if(activeMedia.type === 'image') setZoom(!zoom) }}
-              style={{ cursor: activeMedia.type === 'image' ? (zoom ? 'zoom-out' : 'zoom-in') : 'default' }}
+              onClick={() => { if(activeMedia.type === 'image') setLightboxOpen(true) }}
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+              style={{ cursor: activeMedia.type === 'image' ? 'zoom-in' : 'default' }}
             >
               {activeMedia.type === 'image' ? (
-                <Image 
+                <img 
                   src={activeMedia.url} 
                   alt={product.name} 
-                  fill 
-                  sizes="(max-width: 768px) 100vw, 50vw"
                   className={styles.mainImage} 
                 />
               ) : (
@@ -111,6 +149,17 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                   muted 
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} 
                 />
+              )}
+              {product.media.length > 1 && (
+                <>
+                  <button className={`${styles.navButton} ${styles.prevButton}`} onClick={(e) => { e.stopPropagation(); handlePrev(); }}>‹</button>
+                  <button className={`${styles.navButton} ${styles.nextButton}`} onClick={(e) => { e.stopPropagation(); handleNext(); }}>›</button>
+                  <div className={styles.dots}>
+                    {product.media.map((_: any, idx: number) => (
+                      <div key={idx} className={`${styles.dot} ${idx === activeIndex ? styles.activeDot : ''}`} />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </div>

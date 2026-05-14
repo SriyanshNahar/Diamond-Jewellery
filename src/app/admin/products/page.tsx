@@ -61,6 +61,18 @@ export default function ProductsPage() {
     if (data) setCategories(data);
   };
 
+  const handleToggleBestseller = async (id: number, currentStatus: boolean) => {
+    const { error } = await (supabase.from('products') as any)
+      .update({ is_bestseller: !currentStatus })
+      .eq('id', id);
+
+    if (!error) {
+      setProducts(products.map(p => p.id === id ? { ...p, is_bestseller: !currentStatus } : p));
+    } else {
+      alert('Error updating bestseller status');
+    }
+  };
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -384,6 +396,7 @@ export default function ProductsPage() {
                 <th style={{ textAlign: 'left', padding: '1rem' }}>Image</th>
                 <th style={{ textAlign: 'left', padding: '1rem' }}>Name</th>
                 <th style={{ textAlign: 'left', padding: '1rem' }}>Price</th>
+                <th style={{ textAlign: 'center', padding: '1rem' }}>Bestseller</th>
                 <th style={{ textAlign: 'left', padding: '1rem' }}>Actions</th>
               </tr>
             </thead>
@@ -393,6 +406,21 @@ export default function ProductsPage() {
                   <td style={{ padding: '1rem' }}><img src={prod.img} style={{ width: '40px', height: '40px', objectFit: 'cover' }} /></td>
                   <td style={{ padding: '1rem' }}>{prod.name}</td>
                   <td style={{ padding: '1rem' }}>{formatPrice(prod.price)}</td>
+                  <td style={{ padding: '1rem', textAlign: 'center' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                      <div style={{ position: 'relative' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={prod.is_bestseller} 
+                          onChange={() => handleToggleBestseller(prod.id, prod.is_bestseller)}
+                          style={{ opacity: 0, position: 'absolute', width: 0, height: 0 }} 
+                        />
+                        <div style={{ width: '36px', height: '20px', backgroundColor: prod.is_bestseller ? '#16a34a' : '#d1d5db', borderRadius: '20px', transition: 'background-color 0.2s', position: 'relative' }}>
+                          <div style={{ position: 'absolute', top: '2px', left: prod.is_bestseller ? '18px' : '2px', width: '16px', height: '16px', backgroundColor: 'white', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
+                        </div>
+                      </div>
+                    </label>
+                  </td>
                   <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
                     <button onClick={() => openEditModal(prod)} style={{ color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer' }}><Edit size={16} /></button>
                     <button onClick={() => handleDelete(prod.id)} style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={16} /></button>
