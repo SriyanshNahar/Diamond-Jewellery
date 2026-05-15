@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import Papa from 'papaparse';
 import Link from 'next/link';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -87,7 +88,8 @@ export default function ProductsPage() {
     rating: 4.5,
     reviews: 120,
     category_id: null,
-    stock_count: 10
+    stock_count: 10,
+    description: ''
   });
 
   const getValidImg = (url: string | undefined | null) => {
@@ -178,7 +180,8 @@ export default function ProductsPage() {
     setEditingProduct({
       ...prod,
       images: prod.images || [prod.img],
-      img: prod.img || ''
+      img: prod.img || '',
+      description: prod.description || ''
     });
     setIsEditModalOpen(true);
   };
@@ -200,6 +203,7 @@ export default function ProductsPage() {
       promo: editingProduct.promo,
       is_bestseller: editingProduct.is_bestseller,
       stock_count: editingProduct.stock_count,
+      description: editingProduct.description,
     };
 
     const { data, error } = await (supabase.from('products') as any)
@@ -239,7 +243,7 @@ export default function ProductsPage() {
       setProducts([data[0], ...products]);
       setIsAddModalOpen(false);
       setNewProduct({
-        name: '', price: 0, images: [], is_bestseller: false, promo: '', rating: 4.5, reviews: 120, category_id: null, stock_count: 10
+        name: '', price: 0, images: [], is_bestseller: false, promo: '', rating: 4.5, reviews: 120, category_id: null, stock_count: 10, description: ''
       });
     } else {
       alert('Error adding product: ' + error.message);
@@ -271,7 +275,8 @@ export default function ProductsPage() {
           promo: row.promo ? String(row.promo) : null,
           img: String(row.img || '/rings.png'),
           is_bestseller: row.is_bestseller === 'true' || row.is_bestseller === true,
-          stock_count: row.stock_count ? parseInt(row.stock_count) : 10
+          stock_count: row.stock_count ? parseInt(row.stock_count) : 10,
+          description: row.description ? String(row.description) : null
         }));
 
         const { data, error } = await (supabase.from('products') as any)
@@ -303,34 +308,37 @@ export default function ProductsPage() {
 
   return (
     <div style={{ padding: '2rem', backgroundColor: 'var(--background)', minHeight: '60vh' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.8rem', color: 'var(--color-black)', fontFamily: 'var(--font-heading)' }}>Product Management</h1>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <select 
-            value={selectedCategoryId || ''} 
-            onChange={(e) => setSelectedCategoryId(e.target.value || null)}
-            style={{ padding: '0.6rem 1rem', borderRadius: '4px', border: '1px solid #ddd', background: 'white' }}
-          >
-            <option value="">All Categories</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
-          <Link href="/admin/products/bulk-upload" className="btn-secondary" style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f5f5f5', border: '1px solid #ddd', color: '#333', borderRadius: '4px', textDecoration: 'none' }}>
-            <FileDown size={18} /> Bulk Upload
-          </Link>
-          <button onClick={() => setIsAddModalOpen(true)} className="btn-primary" style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Plus size={18} /> Add Single Product
-          </button>
+      {!isAddModalOpen && !isEditModalOpen && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '1.8rem', color: 'var(--color-black)', fontFamily: 'var(--font-heading)' }}>Product Management</h1>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <select 
+              value={selectedCategoryId || ''} 
+              onChange={(e) => setSelectedCategoryId(e.target.value || null)}
+              style={{ padding: '0.6rem 1rem', borderRadius: '4px', border: '1px solid #ddd', background: 'white' }}
+            >
+              <option value="">All Categories</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+            <Link href="/admin/products/bulk-upload" className="btn-secondary" style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f5f5f5', border: '1px solid #ddd', color: '#333', borderRadius: '4px', textDecoration: 'none' }}>
+              <FileDown size={18} /> Bulk Upload
+            </Link>
+            <button onClick={() => setIsAddModalOpen(true)} className="btn-primary" style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Plus size={18} /> Add Single Product
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      <AnimatePresence>
-        {isAddModalOpen && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'white', padding: '2rem', borderRadius: '8px', width: '500px', maxWidth: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h2 style={{ marginBottom: '1.5rem' }}>Add New Product</h2>
-              <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {isAddModalOpen && (
+        <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', border: '1px solid #eee', maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ margin: 0 }}>Add New Product</h2>
+            <button onClick={() => setIsAddModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#666' }}>✕</button>
+          </div>
+          <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <input required placeholder="Product Name" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} />
                 <input type="number" required placeholder="Price (₹)" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: parseFloat(e.target.value)})} />
                 <select style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={newProduct.category_id || ''} onChange={e => setNewProduct({...newProduct, category_id: parseInt(e.target.value) || null})}>
@@ -383,22 +391,31 @@ export default function ProductsPage() {
                     ))}
                   </div>
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>Product Description</label>
+                  <RichTextEditor 
+                    value={newProduct.description || ''} 
+                    onChange={(val) => setNewProduct({ ...newProduct, description: val })}
+                    placeholder="Write a compelling product description..."
+                  />
+                </div>
                 <input placeholder="Promo Text" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={newProduct.promo || ''} onChange={e => setNewProduct({...newProduct, promo: e.target.value})} />
                 <label><input type="checkbox" checked={newProduct.is_bestseller || false} onChange={e => setNewProduct({...newProduct, is_bestseller: e.target.checked})} /> Mark as Bestseller</label>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <button type="button" onClick={() => setIsAddModalOpen(false)} style={{ flex: 1, padding: '0.8rem' }}>Cancel</button>
-                  <button type="submit" className="btn-primary" style={{ flex: 1, padding: '0.8rem' }} disabled={isUploading}>Add Product</button>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button type="button" onClick={() => setIsAddModalOpen(false)} style={{ flex: 1, padding: '0.8rem', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+                  <button type="button" onClick={handleAddProduct} className="btn-primary" style={{ flex: 1, padding: '0.8rem' }} disabled={isUploading}>Add Product</button>
                 </div>
               </form>
-            </motion.div>
-          </div>
-        )}
+        </div>
+      )}
 
-        {isEditModalOpen && editingProduct && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'white', padding: '2rem', borderRadius: '8px', width: '500px', maxWidth: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h2 style={{ marginBottom: '1.5rem' }}>Edit Product</h2>
-              <form onSubmit={handleEditProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {isEditModalOpen && editingProduct && (
+        <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', border: '1px solid #eee', maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ margin: 0 }}>Edit Product</h2>
+            <button onClick={() => setIsEditModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#666' }}>✕</button>
+          </div>
+          <form onSubmit={handleEditProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <input required placeholder="Product Name" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} />
                 <input type="number" required placeholder="Price (₹)" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: parseFloat(e.target.value)})} />
                 <select style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={editingProduct.category_id || ''} onChange={e => setEditingProduct({...editingProduct, category_id: parseInt(e.target.value) || null})}>
@@ -451,21 +468,26 @@ export default function ProductsPage() {
                     ))}
                   </div>
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>Product Description</label>
+                  <RichTextEditor 
+                    value={editingProduct.description || ''} 
+                    onChange={(val) => setEditingProduct({ ...editingProduct, description: val })}
+                    placeholder="Write a compelling product description..."
+                  />
+                </div>
                 <input placeholder="Promo Text" style={{ padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px' }} value={editingProduct.promo || ''} onChange={e => setEditingProduct({...editingProduct, promo: e.target.value})} />
                 <label><input type="checkbox" checked={editingProduct.is_bestseller || false} onChange={e => setEditingProduct({...editingProduct, is_bestseller: e.target.checked})} /> Mark as Bestseller</label>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <button type="button" onClick={() => setIsEditModalOpen(false)} style={{ flex: 1, padding: '0.8rem' }}>Cancel</button>
-                  <button type="submit" className="btn-primary" style={{ flex: 1, padding: '0.8rem' }} disabled={isUploading}>Save Changes</button>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button type="button" onClick={() => setIsEditModalOpen(false)} style={{ flex: 1, padding: '0.8rem', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+                  <button type="button" onClick={handleEditProduct} className="btn-primary" style={{ flex: 1, padding: '0.8rem' }} disabled={isUploading}>Save Changes</button>
                 </div>
               </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
-
-
-      <div style={{ background: 'white', borderRadius: '8px', padding: '1rem', border: '1px solid #eee', overflowX: 'auto' }}>
+      {!isAddModalOpen && !isEditModalOpen && (
+        <div style={{ background: 'white', borderRadius: '8px', padding: '1rem', border: '1px solid #eee', overflowX: 'auto' }}>
         {isLoading ? <Loader2 className="spin" style={{ margin: '2rem auto', display: 'block' }} /> : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -508,6 +530,7 @@ export default function ProductsPage() {
           </table>
         )}
       </div>
+      )}
       <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
     </div>
   );

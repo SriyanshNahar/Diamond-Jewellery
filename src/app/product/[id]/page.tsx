@@ -182,7 +182,6 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
                 <Star size={16} fill="#D4AF37" color="#D4AF37" />
                 <Star size={16} fill="#D4AF37" color="#D4AF37" />
               </div>
-              <h1 className={styles.productName}>{product.name}</h1>
             </div>
 
             <div className={styles.priceRow}>
@@ -190,28 +189,28 @@ export default function ProductDetailPage({ params: paramsPromise }: { params: P
               {product.old_price && <span className={styles.originalPrice}>{formatPrice(product.old_price)}</span>}
             </div>
             
-            <p className={styles.description}>
-              {product.description || "An exquisite piece featuring perfectly matched, ethically sourced natural diamonds set in solid gold. Designed for an elevated look."}
-            </p>
+            {product.description ? (
+              <div 
+                className={styles.description} 
+                dangerouslySetInnerHTML={{ __html: product.description }} 
+              />
+            ) : (
+              <p className={styles.description}>
+                An exquisite piece featuring perfectly matched, ethically sourced natural diamonds set in solid gold. Designed for an elevated look.
+              </p>
+            )}
 
             <div className={styles.actions}>
               <button 
                 onClick={() => addToCart(product)}
-                className="btn-primary" 
-                style={{ flex: 1, padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                className={`${styles.addToBagBtn} btn-primary`}
               >
                 <ShoppingBag size={20} /> ADD TO BAG
               </button>
               <button 
                 onClick={() => toggleWishlist(product.id)}
                 className={styles.wishlistBtn}
-                style={{ 
-                  padding: '1rem', 
-                  border: '1px solid #ddd', 
-                  borderRadius: '4px', 
-                  background: 'white',
-                  cursor: 'pointer'
-                }}
+                aria-label="Toggle Wishlist"
               >
                 <Heart size={20} fill={isInWishlist(product.id) ? "#ef4444" : "none"} color={isInWishlist(product.id) ? "#ef4444" : "#666"} />
               </button>
